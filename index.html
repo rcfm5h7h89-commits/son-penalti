@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0c1717">
+<meta name="description" content="Son Penaltı. Beş şutluk, giriş gerektirmeyen futbol oyunu.">
+<title>Son Penaltı</title>
+<link rel="stylesheet" href="style.css?v=shop-4">
+<script defer src="game.js?v=shop-4"></script>
+</head>
+<body>
+<main class="page">
+  <header class="mast">
+    <div class="title"><span class="logo" aria-hidden="true">⚽︎</span><h1>Son Penaltı</h1></div>
+    <div class="mast-actions">
+      <button class="reset" id="reset">↻ <span>Yeni seri</span></button>
+      <button class="match-open" id="openMatch" aria-haspopup="dialog">🤖 Maç</button>
+      <button class="shop-open" id="openShop" aria-haspopup="dialog"><span class="coin" aria-hidden="true"></span>Dükkân</button>
+    </div>
+  </header>
+  <div class="layout">
+    <section class="pitch" aria-label="Penaltı sahası">
+      <div class="pitch-head"><strong id="counter">Şut 1 / 5</strong><span id="fieldStatus">Top sende</span></div>
+      <div class="view">
+        <canvas id="field" width="820" height="510" aria-label="Penaltı sahası. Kaleye dokunarak nişan alabilir veya topu yukarı doğru kaydırarak şut çekebilirsin."></canvas>
+        <div id="flash" class="flash" aria-hidden="true" hidden></div>
+      </div>
+      <div class="pitch-foot">Kaleye dokunarak nişan al veya topu yukarı kaydırarak şut çek.</div>
+    </section>
+    <section class="panel" aria-label="Skor ve şut ayarları">
+      <div class="score">
+        <div><h2>Gol</h2><strong id="goals">0</strong><span class="total"> / 5</span></div>
+        <div class="record"><h2>Rekor</h2><strong id="best">0</strong></div>
+        <div class="balance"><h2>Altın</h2><strong id="gold">0</strong></div>
+      </div>
+      <ol class="attempts" id="attempts" aria-label="Penaltı sonuçları"></ol>
+      <p class="reward-rule">5 şutta 3 veya daha fazla gol at, 10 altın kazan.</p>
+      <div class="settings" id="settings">
+        <div class="aim-heading"><h2>Nişan</h2><output id="direction">Orta</output></div>
+        <div class="aim" aria-label="Nişanı ayarla">
+          <button type="button" data-x="-1" data-y="0" aria-label="Sola nişan al">←</button>
+          <button type="button" data-x="0" data-y="-1" aria-label="Yukarı nişan al">↑</button>
+          <button type="button" data-x="0" data-y="1" aria-label="Aşağı nişan al">↓</button>
+          <button type="button" data-x="1" data-y="0" aria-label="Sağa nişan al">→</button>
+        </div>
+        <label for="power">Şut gücü <output id="powerText" for="power">%68</output></label>
+        <input id="power" type="range" min="20" max="100" value="68">
+      </div>
+      <button class="submit" id="kick">Şut çek <span aria-hidden="true">→</span></button>
+      <p class="hint" id="hint">Ok tuşlarıyla nişan al, boşlukla şut çek.</p>
+      <p id="result" class="result" role="status"></p>
+    </section>
+  </div>
+</main>
+<dialog id="shop" class="shop" aria-labelledby="shopTitle">
+  <div class="shop-head">
+    <div>
+      <h2 id="shopTitle">Dükkân</h2>
+      <p>Altının <strong id="shopGold">0</strong></p>
+    </div>
+    <form method="dialog"><button class="shop-close" aria-label="Dükkânı kapat" autofocus>×</button></form>
+  </div>
+  <div class="shop-categories" role="group" aria-label="Dükkân bölümleri">
+    <button type="button" id="showBalls" aria-pressed="true">Toplar</button>
+    <button type="button" id="showShirts" aria-pressed="false">Kaleci Forması</button>
+  </div>
+  <div class="shop-grid" id="shopItems"></div>
+  <div class="shop-footer">
+    <p class="shop-note" id="shopNote" role="status">Aldığın top hemen oyuna girer.</p>
+    <button type="button" id="starterShirt" hidden>İlk formaya dön</button>
+  </div>
+</dialog>
+<dialog id="matchDialog" class="match-dialog" aria-labelledby="matchTitle">
+  <div class="match-head">
+    <div><p class="match-kicker">ÖZEL MOD</p><h2 id="matchTitle">Robotla Penaltı Maçı</h2></div>
+    <button type="button" class="shop-close" id="closeMatch" aria-label="Maçı kapat">×</button>
+  </div>
+  <div class="match-scoreboard">
+    <div><span>Sen</span><strong id="matchPlayerScore">0</strong></div>
+    <b>—</b>
+    <div><span id="robotName">Robot</span><strong id="matchRobotScore">0</strong></div>
+  </div>
+  <p class="match-round" id="matchRound">3 penaltılık karşılaşma</p>
+  <div class="match-log" id="matchLog" aria-live="polite">Maç başlamak üzere!</div>
+  <p class="match-status" id="matchStatus">İlk penaltını kullanmak için bir yön seç.</p>
+  <div class="match-directions" id="matchDirections">
+    <button type="button" data-match-direction="Sol">← Sol</button>
+    <button type="button" data-match-direction="Orta">↑ Orta</button>
+    <button type="button" data-match-direction="Sağ">Sağ →</button>
+  </div>
+  <div class="match-bottom"><p id="matchReward">Kazanan: 30 altın · Beraberlik: 10 altın</p><button type="button" id="restartMatch" hidden>Tekrar oyna</button></div>
+</dialog>
+</body>
+</html>
