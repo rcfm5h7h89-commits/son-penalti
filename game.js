@@ -367,56 +367,62 @@ function matchLater(callback,delay=850) {
   matchTimer=setTimeout(()=>{matchTimer=null;if(matchDialog.open) callback();},delay);
 }
 function renderMatchField() {
-  if(!matchState) return;
+  if(!matchState)return;
   const s=matchState,anim=matchAnimation;
-  const progress=anim?clamp((performance.now()-anim.start)/anim.duration,0,1):0;
-  const easing=smooth(progress);
+  const p=anim?clamp((performance.now()-anim.start)/anim.duration,0,1):0;
+  const travel=anim?smooth(p):0;
+  mc.clearRect(0,0,820,510);
   mc.drawImage(background,0,0);
-  const keeperStart=anim?.keeperStart??410;
-  const keeperEnd=anim?.keeperEnd??(s.phase==="defend"?zoneX[s.keeperZone||"Orta"]:410);
-  const keeperX=anim?mix(keeperStart,keeperEnd,easing):keeperEnd;
-  const dive=anim?Math.sin(Math.PI*easing)*.35:0;
   const shirt=shirts.get(profile.selectedShirt)??defaultShirt;
-  mc.save();mc.translate(keeperX,228);mc.rotate(anim?clamp((keeperEnd-keeperStart)/170,-.65,.65)*easing:0);
-  mc.fillStyle=shirt.body;mc.fillRect(-15,-22,30,37);
-  mc.fillStyle="#e4a782";mc.beginPath();mc.arc(0,-30,11,0,Math.PI*2);mc.fill();
-  mc.strokeStyle=shirt.sleeves;mc.lineWidth=10;mc.beginPath();
-  mc.moveTo(-13,-9);mc.lineTo(-32,-1-dive*20);
-  mc.moveTo(13,-9);mc.lineTo(32,-1-dive*20);mc.stroke();
-  mc.strokeStyle="#263747";mc.lineWidth=9;mc.beginPath();
-  mc.moveTo(-7,15);mc.lineTo(-17,39);mc.moveTo(7,15);mc.lineTo(17,39);mc.stroke();
+  const target=anim?.keeperEnd??410;
+  const x=anim?mix(410,target,travel):s.phase==="defend"?zoneX[s.keeperZone||"Orta"]:410;
+  const lean=anim?clamp((target-410)/110,-1.15,1.15)*Math.sin(Math.PI*Math.min(1,p*1.2)):0;
+  const keeperY=anim?mix(240,210,Math.sin(Math.PI*travel)):240;
+  mc.save();mc.translate(x,keeperY);mc.rotate(lean);
+  mc.lineCap="round";
+  mc.strokeStyle="#172c37";mc.lineWidth=12;
+  mc.beginPath();mc.moveTo(-9,8);mc.lineTo(-24,42);mc.moveTo(9,8);mc.lineTo(24,42);mc.stroke();
+  mc.strokeStyle=shirt.sleeves;mc.lineWidth=12;
+  mc.beginPath();mc.moveTo(-15,-18);mc.lineTo(-43,-35);mc.moveTo(15,-18);mc.lineTo(43,-35);mc.stroke();
+  mc.fillStyle=shirt.body;mc.fillRect(-18,-30,36,42);
+  mc.fillStyle="#e4a782";mc.beginPath();mc.arc(0,-43,14,0,Math.PI*2);mc.fill();
   mc.restore();
   if(s.phase==="player"&&!anim) {
-    const x=s.aim.x,y=s.aim.y;
-    mc.strokeStyle="#e2ff69";mc.lineWidth=3;
-    mc.beginPath();mc.arc(x,y,15,0,Math.PI*2);mc.stroke();
-    mc.beginPath();mc.moveTo(x-8,y);mc.lineTo(x+8,y);mc.moveTo(x,y-8);mc.lineTo(x,y+8);mc.stroke();
+    mc.strokeStyle="#edff62";mc.lineWidth=4;
+    mc.beginPath();mc.arc(s.aim.x,s.aim.y,18,0,Math.PI*2);mc.stroke();
+    mc.beginPath();mc.moveTo(s.aim.x-12,s.aim.y);mc.lineTo(s.aim.x+12,s.aim.y);
+    mc.moveTo(s.aim.x,s.aim.y-12);mc.lineTo(s.aim.x,s.aim.y+12);mc.stroke();
   }
-  if(s.phase==="defend"||s.phase==="robotResult"||anim?.kind==="robot") {
-    mc.fillStyle="#e2ff69";mc.font="bold 23px system-ui";mc.textAlign="center";
-    mc.fillText("KALECİ SENSİN",410,65);
+  if(anim){
+    const bx=mix(spot.x,anim.end.x,travel);
+    const by=mix(spot.y,anim.end.y,travel)-Math.sin(Math.PI*travel)*38;
+    mc.save();mc.globalAlpha=.28;
+    for(let i=1;i<=3;i++){
+      const t=Math.max(0,travel-i*.055);
+      drawBall(mc,mix(spot.x,anim.end.x,t),mix(spot.y,anim.end.y,t)-Math.sin(Math.PI*t)*38, mix(23,10,t),t*13,balls.get(profile.selected));
+    }
+    mc.restore();
+    drawBall(mc,bx,by,mix(26,12,travel),travel*16,balls.get(profile.selected));
+    mc.fillStyle="#ffffff";mc.font="bold 26px system-ui";mc.textAlign="center";
+    mc.shadowColor="#000";mc.shadowBlur=8;
+    mc.fillText(anim.kind==="player"?"ŞUT!":"ROBOT ŞUT ÇEKİYOR!",410,72);
+    mc.shadowBlur=0;
+  } else {
+    drawBall(mc,spot.x,spot.y,26,0,balls.get(profile.selected));
   }
-  const end=anim?.end??spot;
-  const bx=anim?mix(spot.x,end.x,easing):spot.x;
-  const by=anim?mix(spot.y,end.y,easing)-Math.sin(Math.PI*easing)*24:spot.y;
-  ellipse(mc,bx,mix(spot.y+8,goal.bottom,easing),mix(25,8,easing),mix(6,2,easing),"#142f2478");
-  drawBall(mc,bx,by,mix(22,8,easing),easing*12,balls.get(profile.selected));
 }
 function animateMatch(kind,end,keeperEnd,done) {
   clearMatchTimer();
-  matchAnimation={kind,end,keeperStart:410,keeperEnd,start:performance.now(),duration:1800};
-  const animate=()=>{
-    if(!matchDialog.open||!matchAnimation)return;
-    renderMatchField();
-    if(performance.now()-matchAnimation.start<matchAnimation.duration)requestAnimationFrame(animate);
-    else {
-      matchAnimation=null;
-      done();
-    }
-  };
+  const animation={kind,end,keeperEnd,start:performance.now(),duration:2400};
+  matchAnimation=animation;
   matchField.scrollIntoView({block:"center",behavior:"instant"});
-  renderMatchField();
-  requestAnimationFrame(animate);
+  function tick(){
+    if(!matchDialog.open||matchAnimation!==animation)return;
+    renderMatchField();
+    if(performance.now()-animation.start<animation.duration)requestAnimationFrame(tick);
+    else {matchAnimation=null;done();}
+  }
+  requestAnimationFrame(tick);
 }
 function renderMatch() {
   if(!matchState) return;
