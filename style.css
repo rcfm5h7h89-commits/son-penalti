@@ -48,3 +48,11 @@ button{cursor:pointer;font:inherit;min-height:42px;color:var(--text);background:
 @media(max-width:740px){.mast-actions .match-open{min-height:38px;padding:0 7px;font-size:12px}.match-dialog{padding:14px}.match-scoreboard{padding:10px}.match-scoreboard strong{font-size:34px}.match-directions button{min-height:46px}}
 @media(max-width:370px){.mast-actions .match-open{font-size:11px;padding:0 5px}}
 .match-directions[hidden]{display:none}
+
+/* Interactive match field and shoot button */
+#matchField{display:block;width:100%;height:auto;aspect-ratio:820/510;border-radius:10px;border:1px solid #547467;touch-action:none;cursor:crosshair;background:#194b35}
+.match-kick{width:100%;background:var(--lime);border-color:var(--lime);color:var(--ink);font-weight:850;min-height:48px}
+.match-kick:enabled:hover{background:#ecff9e}
+.match-kick[hidden]{display:none}
+.match-dialog{max-height:calc(100dvh - 24px);overflow-y:auto}
+.match-dialog[open]{display:flex}
