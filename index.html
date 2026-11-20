@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#0c1717">
 <meta name="description" content="Son Penaltı. Beş şutluk, giriş gerektirmeyen futbol oyunu.">
 <title>Son Penaltı</title>
-<link rel="stylesheet" href="style.css?v=match-6">
-<script defer src="game.js?v=match-6"></script>
+<link rel="stylesheet" href="style.css?v=match-7">
+<script defer src="game.js?v=match-7"></script>
 </head>
 <body>
 <main class="page">
@@ -83,7 +83,6 @@
   </div>
   <p class="match-round" id="matchRound">3 penaltılık karşılaşma</p>
   <canvas id="matchField" width="820" height="510" aria-label="Maç sahası. Şut için kaleye dokun veya topu yukarı kaydır. Robot şutunda kurtarmak istediğin yönü seç."></canvas>
-  <div class="match-log" id="matchLog" aria-live="polite">Maç başlamak üzere!</div>
   <p class="match-status" id="matchStatus">İlk penaltını kullanmak için kaleye nişan al.</p>
   <div class="match-directions" id="matchDirections">
     <button type="button" data-match-direction="Sol">← Sol</button>
@@ -91,6 +90,7 @@
     <button type="button" data-match-direction="Sağ">Sağ →</button>
   </div>
   <button type="button" class="match-kick" id="matchKick">Şut çek ⚽</button>
+  <div class="match-log" id="matchLog" aria-live="polite">Maç başlamak üzere!</div>
   <div class="match-bottom"><p id="matchReward">Kazanan: 30 altın · Beraberlik: 10 altın</p><button type="button" id="restartMatch" hidden>Tekrar oyna</button></div>
 </dialog>
 </body>
