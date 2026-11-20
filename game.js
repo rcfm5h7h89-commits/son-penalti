@@ -404,7 +404,7 @@ function renderMatchField() {
 }
 function animateMatch(kind,end,keeperEnd,done) {
   clearMatchTimer();
-  matchAnimation={kind,end,keeperStart:410,keeperEnd,start:performance.now(),duration:850};
+  matchAnimation={kind,end,keeperStart:410,keeperEnd,start:performance.now(),duration:1800};
   const animate=()=>{
     if(!matchDialog.open||!matchAnimation)return;
     renderMatchField();
@@ -414,6 +414,8 @@ function animateMatch(kind,end,keeperEnd,done) {
       done();
     }
   };
+  matchField.scrollIntoView({block:"center",behavior:"instant"});
+  renderMatchField();
   requestAnimationFrame(animate);
 }
 function renderMatch() {
