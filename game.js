@@ -357,6 +357,7 @@ const matchZones=["Sol","Orta","Sağ"];
 const zoneX={Sol:goal.left+65,Orta:410,Sağ:goal.right-65};
 let matchGesture=null;
 let matchTimer=null;
+let matchAnimation=null;
 
 function clearMatchTimer() {
   if(matchTimer!==null) {clearTimeout(matchTimer);matchTimer=null;}
@@ -367,28 +368,53 @@ function matchLater(callback,delay=850) {
 }
 function renderMatchField() {
   if(!matchState) return;
+  const s=matchState,anim=matchAnimation;
+  const progress=anim?clamp((performance.now()-anim.start)/anim.duration,0,1):0;
+  const easing=smooth(progress);
   mc.drawImage(background,0,0);
-  const s=matchState;
-  const keeperX=s.phase==="defend"||s.phase==="robotResult" ? zoneX[s.keeperZone||"Orta"] : 410;
-  // Goalkeeper silhouette, using the current purchased goalkeeper shirt.
+  const keeperStart=anim?.keeperStart??410;
+  const keeperEnd=anim?.keeperEnd??(s.phase==="defend"?zoneX[s.keeperZone||"Orta"]:410);
+  const keeperX=anim?mix(keeperStart,keeperEnd,easing):keeperEnd;
+  const dive=anim?Math.sin(Math.PI*easing)*.35:0;
   const shirt=shirts.get(profile.selectedShirt)??defaultShirt;
-  mc.fillStyle=shirt.body;mc.fillRect(keeperX-15,206,30,37);
-  mc.fillStyle="#e4a782";mc.beginPath();mc.arc(keeperX,198,11,0,Math.PI*2);mc.fill();
-  mc.strokeStyle=shirt.sleeves;mc.lineWidth=10;mc.beginPath();mc.moveTo(keeperX-13,219);mc.lineTo(keeperX-32,230);mc.moveTo(keeperX+13,219);mc.lineTo(keeperX+32,230);mc.stroke();
-  mc.strokeStyle="#263747";mc.lineWidth=9;mc.beginPath();mc.moveTo(keeperX-7,241);mc.lineTo(keeperX-17,267);mc.moveTo(keeperX+7,241);mc.lineTo(keeperX+17,267);mc.stroke();
-  if(s.phase==="player"||s.phase==="playerResult") {
+  mc.save();mc.translate(keeperX,228);mc.rotate(anim?clamp((keeperEnd-keeperStart)/170,-.65,.65)*easing:0);
+  mc.fillStyle=shirt.body;mc.fillRect(-15,-22,30,37);
+  mc.fillStyle="#e4a782";mc.beginPath();mc.arc(0,-30,11,0,Math.PI*2);mc.fill();
+  mc.strokeStyle=shirt.sleeves;mc.lineWidth=10;mc.beginPath();
+  mc.moveTo(-13,-9);mc.lineTo(-32,-1-dive*20);
+  mc.moveTo(13,-9);mc.lineTo(32,-1-dive*20);mc.stroke();
+  mc.strokeStyle="#263747";mc.lineWidth=9;mc.beginPath();
+  mc.moveTo(-7,15);mc.lineTo(-17,39);mc.moveTo(7,15);mc.lineTo(17,39);mc.stroke();
+  mc.restore();
+  if(s.phase==="player"&&!anim) {
     const x=s.aim.x,y=s.aim.y;
     mc.strokeStyle="#e2ff69";mc.lineWidth=3;
     mc.beginPath();mc.arc(x,y,15,0,Math.PI*2);mc.stroke();
     mc.beginPath();mc.moveTo(x-8,y);mc.lineTo(x+8,y);mc.moveTo(x,y-8);mc.lineTo(x,y+8);mc.stroke();
   }
-  if(s.phase==="defend"||s.phase==="robotResult") {
+  if(s.phase==="defend"||s.phase==="robotResult"||anim?.kind==="robot") {
     mc.fillStyle="#e2ff69";mc.font="bold 23px system-ui";mc.textAlign="center";
     mc.fillText("KALECİ SENSİN",410,65);
   }
-  const ballX=s.phase==="robotResult" ? zoneX[s.robotShotZone] : spot.x;
-  const ballY=s.phase==="robotResult" ? 260 : spot.y;
-  drawBall(mc,ballX,ballY,s.phase==="robotResult"?12:22,0,balls.get(profile.selected));
+  const end=anim?.end??spot;
+  const bx=anim?mix(spot.x,end.x,easing):spot.x;
+  const by=anim?mix(spot.y,end.y,easing)-Math.sin(Math.PI*easing)*24:spot.y;
+  ellipse(mc,bx,mix(spot.y+8,goal.bottom,easing),mix(25,8,easing),mix(6,2,easing),"#142f2478");
+  drawBall(mc,bx,by,mix(22,8,easing),easing*12,balls.get(profile.selected));
+}
+function animateMatch(kind,end,keeperEnd,done) {
+  clearMatchTimer();
+  matchAnimation={kind,end,keeperStart:410,keeperEnd,start:performance.now(),duration:850};
+  const animate=()=>{
+    if(!matchDialog.open||!matchAnimation)return;
+    renderMatchField();
+    if(performance.now()-matchAnimation.start<matchAnimation.duration)requestAnimationFrame(animate);
+    else {
+      matchAnimation=null;
+      done();
+    }
+  };
+  requestAnimationFrame(animate);
 }
 function renderMatch() {
   if(!matchState) return;
@@ -413,10 +439,11 @@ function renderMatch() {
   get("matchKick").hidden=s.phase!=="player";
   get("restartMatch").hidden=s.phase!=="done";
   matchDirections.forEach(button=>button.disabled=s.phase!=="defend");
-  renderMatchField();
+  if(!matchAnimation)renderMatchField();
 }
 function startMatch() {
   clearMatchTimer();
+  matchAnimation=null;
   matchGesture=null;
   matchState={round:0,playerGoals:0,robotGoals:0,phase:"player",log:[],
     robotName:robotNames[Math.floor(Math.random()*robotNames.length)],
@@ -445,16 +472,21 @@ function fireMatch() {
   if(!s||s.phase!=="player")return;
   const shot=makeShot(s.aim,68,410,s.round,Math.random());
   const scored=shot.outcome==="goal";
-  s.playerGoals+=Number(scored);
   const direction=s.aim.x<350?"Sol":s.aim.x>470?"Sağ":"Orta";
-  s.log.push({who:"Sen",direction,goal:scored});
-  s.phase="playerResult";
-  s.status=scored?"GOL! Şimdi kaleye geç.":"Şut kaçtı! Şimdi kaleye geç.";
+  s.phase="playerFlight";s.status="Top kaleye gidiyor…";
   renderMatch();
-  matchLater(()=>{
-    s.phase="defend";
-    s.status=s.robotName+" şut çekecek! Kurtarmak için Sol, Orta veya Sağ seç.";
+  animateMatch("player",shot.ends,shot.dive,()=>{
+    if(matchState!==s)return;
+    s.playerGoals+=Number(scored);
+    s.log.push({who:"Sen",direction,goal:scored});
+    s.phase="playerResult";
+    s.status=scored?"GOL! Şimdi kaleye geç.":shot.outcome==="save"?"Kaleci kurtardı!":"Şut dışarı gitti!";
     renderMatch();
+    matchLater(()=>{
+      s.phase="defend";s.keeperZone="Orta";
+      s.status=s.robotName+" şut çekecek! Kurtarmak için Sol, Orta veya Sağ seç.";
+      renderMatch();
+    },950);
   });
 }
 function defendMatch(direction) {
@@ -465,22 +497,28 @@ function defendMatch(direction) {
   const onTarget=Math.random()<0.88;
   const saved=direction===s.robotShotZone&&Math.random()<0.88;
   const scored=onTarget&&!saved;
-  s.robotGoals+=Number(scored);
-  s.log.push({who:s.robotName,direction:s.robotShotZone,goal:scored});
-  s.phase="robotResult";
-  s.status=scored?"Robot gol attı!":saved?"Kurtardın!":"Robotun şutu dışarı gitti!";
+  const end={x:zoneX[s.robotShotZone],y:onTarget?190:goal.top-30};
+  s.phase="robotFlight";s.status=s.robotName+" şut çekiyor…";
   renderMatch();
-  matchLater(()=>{
-    s.round++;
-    if(s.round===3){finishMatch();return;}
-    s.phase="player";s.aim={x:410,y:195};s.keeperZone="Orta";
-    s.status=(s.round+1)+". penaltını kullan! Kaleye nişan al.";
+  animateMatch("robot",end,zoneX[direction],()=>{
+    if(matchState!==s)return;
+    s.robotGoals+=Number(scored);
+    s.log.push({who:s.robotName,direction:s.robotShotZone,goal:scored});
+    s.phase="robotResult";
+    s.status=scored?"Robot gol attı!":saved?"Kurtardın!":"Robotun şutu dışarı gitti!";
     renderMatch();
+    matchLater(()=>{
+      s.round++;
+      if(s.round===3){finishMatch();return;}
+      s.phase="player";s.aim={x:410,y:195};s.keeperZone="Orta";
+      s.status=(s.round+1)+". penaltını kullan! Kaleye nişan al.";
+      renderMatch();
+    },950);
   });
 }
 get("openMatch").addEventListener("click",startMatch);
 get("closeMatch").addEventListener("click",()=>matchDialog.close());
-matchDialog.addEventListener("close",()=>{clearMatchTimer();matchGesture=null;});
+matchDialog.addEventListener("close",()=>{clearMatchTimer();matchAnimation=null;matchGesture=null;});
 get("restartMatch").addEventListener("click",startMatch);
 get("matchKick").addEventListener("click",fireMatch);
 matchDirections.forEach(button=>button.addEventListener("click",()=>defendMatch(button.dataset.matchDirection)));
