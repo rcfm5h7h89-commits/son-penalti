@@ -69,3 +69,13 @@ button{cursor:pointer;font:inherit;min-height:42px;color:var(--text);background:
 .match-status{font-size:13px;min-height:18px}
 .match-directions button{min-height:40px}
 .match-kick{min-height:40px}
+
+/* Larger match screen on phones; desktop layout remains unchanged. */
+@media(max-width:740px){
+  .match-dialog{width:calc(100vw - 8px);max-width:none;max-height:calc(100dvh - 8px);margin:auto;padding:8px;border-radius:12px;box-sizing:border-box}
+  .match-dialog[open]{gap:6px;padding:8px}
+  #matchField{width:100%;max-height:55dvh;aspect-ratio:820/510;object-fit:contain;box-sizing:border-box}
+  .match-scoreboard{padding:7px}
+  .match-scoreboard strong{font-size:32px}
+  .match-log{max-height:55px}
+}
