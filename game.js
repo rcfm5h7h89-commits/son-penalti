@@ -403,13 +403,13 @@ function renderMatchField() {
   }
   const end=anim?.end??spot;
   const bx=mix(spot.x,end.x,travel);
-  const by=mix(spot.y,end.y,travel)-Math.sin(Math.PI*travel)*17;
+  const by=mix(spot.y,end.y,travel)-Math.sin(Math.PI*travel)*(anim?.power??power)/4;
   ellipse(mc,bx,mix(spot.y+8,goal.bottom,travel),mix(25,8,travel),mix(6,2,travel),"#142f2478");
   drawBall(mc,bx,by,mix(22,7,travel),travel*13,balls.get(profile.selected));
 }
-function animateMatch(kind,end,keeperEnd,done,duration=650,keeperHeight=200) {
+function animateMatch(kind,end,keeperEnd,done,duration=650,keeperHeight=200,shotPower=68) {
   clearMatchTimer();
-  const animation={kind,end,keeperEnd,keeperHeight,start:performance.now(),duration};
+  const animation={kind,end,keeperEnd,keeperHeight,power:shotPower,start:performance.now(),duration};
   matchAnimation=animation;
 
   function tick(){
@@ -474,7 +474,8 @@ function aimMatch(x,y) {
 function fireMatch() {
   const s=matchState;
   if(!s||s.phase!=="player")return;
-  const shot=makeShot(s.aim,68,410,s.round,Math.random());
+  const matchPower=Number(powerInput.value);
+  const shot=makeShot(s.aim,matchPower,410,s.round,Math.random());
   const scored=shot.outcome==="goal";
   const direction=s.aim.x<350?"Sol":s.aim.x>470?"Sağ":"Orta";
   s.phase="playerFlight";s.status="Top kaleye gidiyor…";
@@ -490,8 +491,8 @@ function fireMatch() {
       s.phase="defend";s.keeperZone="Orta";
       s.status=s.robotName+" şut çekecek! Kurtarmak için Sol, Orta veya Sağ seç.";
       renderMatch();
-    },950);
-  },shot.duration*1000,shot.height);
+    },350);
+  },shot.duration*1000,shot.height,matchPower);
 }
 function defendMatch(direction) {
   const s=matchState;
@@ -518,7 +519,7 @@ function defendMatch(direction) {
       s.status=(s.round+1)+". penaltını kullan! Kaleye nişan al.";
       renderMatch();
     },950);
-  });
+  },mix(.9,.44,(68-20)/80)*1000,200,68);
 }
 get("openMatch").addEventListener("click",startMatch);
 get("closeMatch").addEventListener("click",()=>matchDialog.close());
