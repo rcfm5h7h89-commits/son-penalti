@@ -349,15 +349,56 @@ function renderShop() {
 
 let matchState=null;
 const matchLog=get("matchLog");
+const matchField=get("matchField");
+const mc=matchField.getContext("2d");
 const matchDirections=[...document.querySelectorAll("[data-match-direction]")];
+const robotNames=["Atlas","RoboGol","Demir","Turbo","Kaptan Bot","Şimşek"];
+const matchZones=["Sol","Orta","Sağ"];
+const zoneX={Sol:goal.left+65,Orta:410,Sağ:goal.right-65};
+let matchGesture=null;
+let matchTimer=null;
 
+function clearMatchTimer() {
+  if(matchTimer!==null) {clearTimeout(matchTimer);matchTimer=null;}
+}
+function matchLater(callback,delay=850) {
+  clearMatchTimer();
+  matchTimer=setTimeout(()=>{matchTimer=null;if(matchDialog.open) callback();},delay);
+}
+function renderMatchField() {
+  if(!matchState) return;
+  mc.drawImage(background,0,0);
+  const s=matchState;
+  const keeperX=s.phase==="defend"||s.phase==="robotResult" ? zoneX[s.keeperZone||"Orta"] : 410;
+  // Goalkeeper silhouette, using the current purchased goalkeeper shirt.
+  const shirt=shirts.get(profile.selectedShirt)??defaultShirt;
+  mc.fillStyle=shirt.body;mc.fillRect(keeperX-15,206,30,37);
+  mc.fillStyle="#e4a782";mc.beginPath();mc.arc(keeperX,198,11,0,Math.PI*2);mc.fill();
+  mc.strokeStyle=shirt.sleeves;mc.lineWidth=10;mc.beginPath();mc.moveTo(keeperX-13,219);mc.lineTo(keeperX-32,230);mc.moveTo(keeperX+13,219);mc.lineTo(keeperX+32,230);mc.stroke();
+  mc.strokeStyle="#263747";mc.lineWidth=9;mc.beginPath();mc.moveTo(keeperX-7,241);mc.lineTo(keeperX-17,267);mc.moveTo(keeperX+7,241);mc.lineTo(keeperX+17,267);mc.stroke();
+  if(s.phase==="player"||s.phase==="playerResult") {
+    const x=s.aim.x,y=s.aim.y;
+    mc.strokeStyle="#e2ff69";mc.lineWidth=3;
+    mc.beginPath();mc.arc(x,y,15,0,Math.PI*2);mc.stroke();
+    mc.beginPath();mc.moveTo(x-8,y);mc.lineTo(x+8,y);mc.moveTo(x,y-8);mc.lineTo(x,y+8);mc.stroke();
+  }
+  if(s.phase==="defend"||s.phase==="robotResult") {
+    mc.fillStyle="#e2ff69";mc.font="bold 23px system-ui";mc.textAlign="center";
+    mc.fillText("KALECİ SENSİN",410,65);
+  }
+  const ballX=s.phase==="robotResult" ? zoneX[s.robotShotZone] : spot.x;
+  const ballY=s.phase==="robotResult" ? 260 : spot.y;
+  drawBall(mc,ballX,ballY,s.phase==="robotResult"?12:22,0,balls.get(profile.selected));
+}
 function renderMatch() {
   if(!matchState) return;
-  get("matchPlayerScore").textContent=matchState.playerGoals;
-  get("matchRobotScore").textContent=matchState.robotGoals;
-  get("matchRound").textContent=matchState.phase==="done"?"Maç tamamlandı":"Penaltı "+(matchState.round+1)+" / 3";
+  const s=matchState;
+  get("robotName").textContent=s.robotName;
+  get("matchPlayerScore").textContent=s.playerGoals;
+  get("matchRobotScore").textContent=s.robotGoals;
+  get("matchRound").textContent=s.phase==="done"?"Maç tamamlandı":"Penaltı "+(s.round+1)+" / 3";
   matchLog.replaceChildren();
-  matchState.log.forEach(entry=>{
+  s.log.forEach(entry=>{
     const line=document.createElement("p");
     const who=document.createElement("span");
     const result=document.createElement("strong");
@@ -366,55 +407,112 @@ function renderMatch() {
     result.className=entry.goal?"goal-text":"miss-text";
     line.append(who,result);matchLog.append(line);
   });
-  get("matchStatus").textContent=matchState.status;
-  get("matchDirections").hidden=matchState.phase!=="player";
-  get("restartMatch").hidden=matchState.phase!=="done";
-  matchDirections.forEach(button=>button.disabled=matchState.phase!=="player");
+  matchLog.scrollTop=matchLog.scrollHeight;
+  get("matchStatus").textContent=s.status;
+  get("matchDirections").hidden=s.phase!=="defend";
+  get("matchKick").hidden=s.phase!=="player";
+  get("restartMatch").hidden=s.phase!=="done";
+  matchDirections.forEach(button=>button.disabled=s.phase!=="defend");
+  renderMatchField();
 }
-
 function startMatch() {
-  matchState={round:0,playerGoals:0,robotGoals:0,phase:"player",log:[],status:"İlk penaltını kullanmak için bir yön seç."};
+  clearMatchTimer();
+  matchGesture=null;
+  matchState={round:0,playerGoals:0,robotGoals:0,phase:"player",log:[],
+    robotName:robotNames[Math.floor(Math.random()*robotNames.length)],
+    aim:{x:410,y:195},keeperZone:"Orta",robotShotZone:"Orta",
+    status:"Kaleye dokunarak nişan al veya topu yukarı kaydırarak şut çek."};
+  if(!matchDialog.open)matchDialog.showModal();
   renderMatch();
-  matchDialog.showModal();
 }
-
 function finishMatch() {
-  const {playerGoals,robotGoals}=matchState;
-  let reward=0,message="Robot maçı kazandı. Bir dahaki sefere!";
-  if(playerGoals>robotGoals){reward=30;message="Tebrikler! Maçı kazandın, 30 altın senin!";}
-  else if(playerGoals===robotGoals){reward=10;message="Maç berabere! 10 altın kazandın.";}
-  matchState.phase="done";
-  matchState.status=message;
-  if(reward>0) updateProfile(current=>({...current,gold:current.gold+reward}));
+  const s=matchState;
+  if(!s||s.phase==="done")return;
+  let reward=0,message=s.robotName+" kazandı. Bir dahaki sefere!";
+  if(s.playerGoals>s.robotGoals){reward=30;message="Maçı kazandın! 30 altın senin!";}
+  else if(s.playerGoals===s.robotGoals){reward=10;message="Berabere! 10 altın kazandın.";}
+  s.phase="done";s.status=message;
+  if(reward)updateProfile(current=>({...current,gold:current.gold+reward}));
   renderMatch();
 }
-
-function playMatchRound(direction) {
-  if(!matchState||matchState.phase!=="player") return;
-  const playerGoal=Math.random()<0.67;
-  matchState.playerGoals+=Number(playerGoal);
-  matchState.log.push({who:"Sen",direction,goal:playerGoal});
-  matchState.status="Robot penaltısını kullanıyor…";
-  matchState.phase="robot";
+function aimMatch(x,y) {
+  if(!matchState||matchState.phase!=="player")return;
+  matchState.aim={x:clamp(x,goal.left-25,goal.right+25),y:clamp(y,goal.top-40,goal.bottom+20)};
   renderMatch();
-  const robotDirections=["Sol","Orta","Sağ"];
-  const robotDirection=robotDirections[Math.floor(Math.random()*robotDirections.length)];
-  const robotGoal=Math.random()<0.64;
-  matchState.robotGoals+=Number(robotGoal);
-  matchState.log.push({who:"Robot",direction:robotDirection,goal:robotGoal});
-  matchState.round++;
-  if(matchState.round>=3) finishMatch();
-  else {
-    matchState.phase="player";
-    matchState.status=(matchState.round+1)+". penaltı: yönünü seç!";
+}
+function fireMatch() {
+  const s=matchState;
+  if(!s||s.phase!=="player")return;
+  const shot=makeShot(s.aim,68,410,s.round,Math.random());
+  const scored=shot.outcome==="goal";
+  s.playerGoals+=Number(scored);
+  const direction=s.aim.x<350?"Sol":s.aim.x>470?"Sağ":"Orta";
+  s.log.push({who:"Sen",direction,goal:scored});
+  s.phase="playerResult";
+  s.status=scored?"GOL! Şimdi kaleye geç.":"Şut kaçtı! Şimdi kaleye geç.";
+  renderMatch();
+  matchLater(()=>{
+    s.phase="defend";
+    s.status=s.robotName+" şut çekecek! Kurtarmak için Sol, Orta veya Sağ seç.";
     renderMatch();
-  }
+  });
 }
-
+function defendMatch(direction) {
+  const s=matchState;
+  if(!s||s.phase!=="defend")return;
+  s.keeperZone=direction;
+  s.robotShotZone=matchZones[Math.floor(Math.random()*3)];
+  const onTarget=Math.random()<0.88;
+  const saved=direction===s.robotShotZone&&Math.random()<0.88;
+  const scored=onTarget&&!saved;
+  s.robotGoals+=Number(scored);
+  s.log.push({who:s.robotName,direction:s.robotShotZone,goal:scored});
+  s.phase="robotResult";
+  s.status=scored?"Robot gol attı!":saved?"Kurtardın!":"Robotun şutu dışarı gitti!";
+  renderMatch();
+  matchLater(()=>{
+    s.round++;
+    if(s.round===3){finishMatch();return;}
+    s.phase="player";s.aim={x:410,y:195};s.keeperZone="Orta";
+    s.status=(s.round+1)+". penaltını kullan! Kaleye nişan al.";
+    renderMatch();
+  });
+}
 get("openMatch").addEventListener("click",startMatch);
 get("closeMatch").addEventListener("click",()=>matchDialog.close());
+matchDialog.addEventListener("close",()=>{clearMatchTimer();matchGesture=null;});
 get("restartMatch").addEventListener("click",startMatch);
-matchDirections.forEach(button=>button.addEventListener("click",()=>playMatchRound(button.dataset.matchDirection)));
+get("matchKick").addEventListener("click",fireMatch);
+matchDirections.forEach(button=>button.addEventListener("click",()=>defendMatch(button.dataset.matchDirection)));
+function matchPoint(event) {
+  const rect=matchField.getBoundingClientRect();
+  return {x:(event.clientX-rect.left)*W/rect.width,y:(event.clientY-rect.top)*H/rect.height};
+}
+matchField.addEventListener("pointerdown",event=>{
+  if(!matchState||matchState.phase!=="player"||event.button!==0)return;
+  const p=matchPoint(event);
+  matchGesture={id:event.pointerId,origin:p,swipe:p.y>342};
+  if(!matchGesture.swipe)aimMatch(p.x,p.y);
+  matchField.setPointerCapture(event.pointerId);
+});
+matchField.addEventListener("pointermove",event=>{
+  if(!matchGesture||matchGesture.id!==event.pointerId)return;
+  const p=matchPoint(event);
+  if(matchGesture.swipe)aimMatch(spot.x+(p.x-matchGesture.origin.x)*1.55,267-(matchGesture.origin.y-p.y)*.55);
+  else aimMatch(p.x,p.y);
+});
+matchField.addEventListener("pointerup",event=>{
+  if(!matchGesture||matchGesture.id!==event.pointerId)return;
+  const p=matchPoint(event);
+  if(matchGesture.swipe&&matchGesture.origin.y-p.y>=42) {
+    aimMatch(spot.x+(p.x-matchGesture.origin.x)*1.55,267-(matchGesture.origin.y-p.y)*.55);
+    fireMatch();
+  }
+  matchGesture=null;
+});
+for(const name of ["pointercancel","lostpointercapture"])matchField.addEventListener(name,event=>{
+  if(matchGesture?.id===event.pointerId)matchGesture=null;
+});
 
 function showCategory(next) {
   category=next;
