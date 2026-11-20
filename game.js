@@ -411,9 +411,9 @@ function renderMatchField() {
     drawBall(mc,spot.x,spot.y,26,0,balls.get(profile.selected));
   }
 }
-function animateMatch(kind,end,keeperEnd,done) {
+function animateMatch(kind,end,keeperEnd,done,duration=650) {
   clearMatchTimer();
-  const animation={kind,end,keeperEnd,start:performance.now(),duration:2400};
+  const animation={kind,end,keeperEnd,start:performance.now(),duration};
   matchAnimation=animation;
   matchField.scrollIntoView({block:"center",behavior:"instant"});
   function tick(){
@@ -495,7 +495,7 @@ function fireMatch() {
       s.status=s.robotName+" şut çekecek! Kurtarmak için Sol, Orta veya Sağ seç.";
       renderMatch();
     },950);
-  });
+  },shot.duration*1000);
 }
 function defendMatch(direction) {
   const s=matchState;
