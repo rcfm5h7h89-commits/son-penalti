@@ -5,16 +5,6 @@
  if(lang==="tr")return;
  const dict={...translations.en,...(translations[lang]||{})};
  document.documentElement.lang=translations[lang]?lang:"en";
- const rules=[
- [/^Şut (\d+) \/ (\d+)$/,(a,b)=>"Shot "+a+" / "+b],
- [/^Penaltı (\d+) \/ (\d+)$/,(a,b)=>"Penalty "+a+" / "+b],
- [/^(\d+)\. penaltını kullan! Kaleye nişan al\.$/,(a)=>"Take penalty "+a+"! Aim at the goal."],
- [/^(.+) şut çekecek! Kurtarmak için Sol, Orta veya Sağ seç\.$/,(a)=>a+" will shoot! Choose left, center or right to save."],
- [/^(.+) şut çekiyor…$/,(a)=>a+" is shooting…"],
- [/^(.+) kazandı\. Bir dahaki sefere!$/,(a)=>a+" won. Better luck next time!"],
- [/^Maçı kazandın! 30 altın senin!$/()=>""]
- ];
- rules.pop();
  const patterns=[
  [/^(\d+) altın$/,(n)=>n+" coins"],
  [/^Bu ürün için (\d+) altın daha gerekiyor\.$/,(n)=>"You need "+n+" more coins."],
