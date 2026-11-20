@@ -5,6 +5,8 @@
  if(lang==="tr")return;
  const dict={...translations.en,...(translations[lang]||{})};
  document.documentElement.lang=translations[lang]?lang:"en";
+ const extra={en:{"Şut":"Shot","Seri tamamlandı.":"Series complete.","Şut dışarı gitti!":"Shot missed!","Top kaleye gidiyor…":"Ball flying toward goal…","Şut çekildi":"Shot taken","Kurtardın!":"You saved it!","Robotun şutu dışarı gitti!":"Robot missed!","Robot gol attı!":"Robot scored!","Kaleci kurtardı!":"Keeper saved it!","Şut gücü":"Shot power","Top sende":"Your turn","Maç tamamlandı":"Match finished"},es:{"Şut gücü":"Potencia de tiro","Top sende":"Tu turno","Şut çekildi":"Tiro realizado","Kaleci kurtardı!":"¡Parada del portero!","Şut dışarı gitti!":"¡Tiro fuera!","Robot gol attı!":"¡Gol del robot!","Kurtardın!":"¡Has parado!","Maç tamamlandı":"Partido terminado"},de:{"Şut gücü":"Schusskraft","Top sende":"Du bist dran","Şut çekildi":"Schuss abgegeben","Kaleci kurtardı!":"Torwart hält!","Şut dışarı gitti!":"Schuss daneben!","Robot gol attı!":"Roboter trifft!","Kurtardın!":"Gehalten!","Maç tamamlandı":"Spiel beendet"},fr:{"Şut gücü":"Puissance du tir","Top sende":"À toi de jouer","Şut çekildi":"Tir effectué","Kaleci kurtardı!":"Arrêt du gardien !","Şut dışarı gitti!":"Tir manqué !","Robot gol attı!":"Le robot a marqué !","Kurtardın!":"Arrêt réussi !","Maç tamamlandı":"Match terminé"}};
+ Object.assign(dict,extra.en,extra[lang]||{});
  const patterns=[
  [/^(\d+) altın$/,(n)=>n+" coins"],
  [/^Bu ürün için (\d+) altın daha gerekiyor\.$/,(n)=>"You need "+n+" more coins."],
