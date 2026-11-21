@@ -32,6 +32,14 @@ const balls = new Map([
   ["trophy",{name:"Altın Kupa",price:400,glow:"#fff6a6",base:"#f6c853",edge:"#a7631b",patch:"#874815",accent:"#fff9c0",pattern:"star"}]
 ]);
 
+const stadiums=new Map([
+  ["classic",{name:"Klasik Stadyum",price:0,sky:"#0a2024",skyEnd:"#385d53",stand:"#203b3a",crowd:"#142c2c",turf:"#387954",turfEnd:"#173d2a"}],
+  ["night",{name:"Gece Arenası",price:100,sky:"#080e2d",skyEnd:"#202b60",stand:"#252654",crowd:"#141735",turf:"#287253",turfEnd:"#0b382b"}],
+  ["sunset",{name:"Gün Batımı",price:150,sky:"#ba5a43",skyEnd:"#e9aa6d",stand:"#8b514b",crowd:"#56343f",turf:"#548a4b",turfEnd:"#214d30"}],
+  ["blue",{name:"Mavi Arena",price:220,sky:"#163a69",skyEnd:"#4e83a8",stand:"#26598a",crowd:"#163b69",turf:"#368c69",turfEnd:"#1b5541"}],
+  ["gold",{name:"Şampiyon Stadyumu",price:350,sky:"#473220",skyEnd:"#b68b4e",stand:"#99723e",crowd:"#554026",turf:"#59954b",turfEnd:"#28502d"}]
+]);
+let activeStadium=stadiums.get("classic");
 const defaultShirt = {body:"#ffb34e",sleeves:"#e98b43",stripe:"#f7d06f"};
 const shirtPrice = 40;
 const shirts = new Map([
@@ -60,7 +68,7 @@ background.width=W;background.height=H;
 function buildStadium() {
   const g=background.getContext("2d");
   const sky=g.createLinearGradient(0,0,0,280);
-  sky.addColorStop(0,"#0a2024");sky.addColorStop(1,"#385d53");
+  sky.addColorStop(0,activeStadium.sky);sky.addColorStop(1,activeStadium.skyEnd);
   g.fillStyle=sky;g.fillRect(0,0,W,H);
   for(const x of [80,740]) {
     const glow=g.createRadialGradient(x,50,6,x,50,155);
@@ -72,8 +80,8 @@ function buildStadium() {
       g.fillStyle="#edfbe0";g.fillRect(x-30+i*8,39,5,5);g.fillRect(x-30+i*8,48,5,5);
     }
   }
-  polygon(g,[[0,99],[146,123],[302,136],[500,136],[682,121],[820,97],[820,239],[0,239]],"#203b3a","#50706a",3);
-  polygon(g,[[0,141],[167,152],[330,158],[490,158],[665,153],[820,138],[820,219],[0,219]],"#142c2c");
+  polygon(g,[[0,99],[146,123],[302,136],[500,136],[682,121],[820,97],[820,239],[0,239]],activeStadium.stand,"#50706a",3);
+  polygon(g,[[0,141],[167,152],[330,158],[490,158],[665,153],[820,138],[820,219],[0,219]],activeStadium.crowd);
   let seed=150;
   const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
   const palette=["#79a698","#335f56","#ddd77b","#9c7664","#52746d","#bcc1a8"];
@@ -89,7 +97,7 @@ function buildStadium() {
     polygon(g,[[x+9,233],[x+71,233]],null,"#c0d68066",2);
   }
   const turf=g.createLinearGradient(0,233,0,510);
-  turf.addColorStop(0,"#387954");turf.addColorStop(1,"#173d2a");
+  turf.addColorStop(0,activeStadium.turf);turf.addColorStop(1,activeStadium.turfEnd);
   g.fillStyle=turf;g.fillRect(0,246,W,H-246);
   for(let i=-5;i<5;i+=2) polygon(g,[[410+i*72,245],[410+(i+1)*72,245],[410+(i+1)*154,H],[410+i*154,H]],"#7ed06419");
   for(let i=0;i<650;i++) {
@@ -233,9 +241,11 @@ const matchDialog=get("matchDialog");
 const shopNote=get("shopNote");
 const shopItems=get("shopItems");
 const starterShirt=get("starterShirt");
-const initialProfile={gold:0,legacyGold:0,owned:["classic"],selected:"classic",ownedShirts:[],selectedShirt:null};
+const initialProfile={gold:0,legacyGold:0,owned:["classic"],selected:"classic",ownedShirts:[],selectedShirt:null,ownedStadiums:["classic"],selectedStadium:"classic"};
 let profile=readProfile(initialProfile);
 let category="balls";
+activeStadium=stadiums.get(profile.selectedStadium)||stadiums.get("classic");
+buildStadium();
 
 function readProfile(fallback) {
   try {
@@ -250,7 +260,10 @@ function readProfile(fallback) {
     const selectedShirt=ownedShirts.includes(saved.selectedShirt)?saved.selectedShirt:null;
     const gold=Number.isSafeInteger(saved.gold)&&saved.gold>=0?saved.gold:0;
     const imported=Number.isSafeInteger(saved.legacyGold)?saved.legacyGold:legacyGold;
-    return {gold:gold+Math.max(0,legacyGold-imported),legacyGold,owned,selected,ownedShirts,selectedShirt};
+    const ownedStadiums=Array.isArray(saved.ownedStadiums)?saved.ownedStadiums.filter(id=>stadiums.has(id)):["classic"];
+    if(!ownedStadiums.includes("classic"))ownedStadiums.unshift("classic");
+    const selectedStadium=ownedStadiums.includes(saved.selectedStadium)?saved.selectedStadium:"classic";
+    return {gold:gold+Math.max(0,legacyGold-imported),legacyGold,owned,selected,ownedShirts,selectedShirt,ownedStadiums,selectedStadium};
   } catch {return fallback;}
 }
 
@@ -258,6 +271,8 @@ function updateProfile(change) {
   const update=()=>{
     const current=readProfile(profile);
     profile=change(current);
+    activeStadium=stadiums.get(profile.selectedStadium)||stadiums.get("classic");
+    buildStadium();
     if(profile!==current) {
       try {localStorage.setItem(profileKey,JSON.stringify(profile));} catch {}
     }
@@ -302,6 +317,16 @@ function previewShirt(context,skin) {
   polygon(context,[[81,38],[92,38],[92,47],[86.5,51],[81,47]],skin.stripe,"#f0f7ed",1);
 }
 
+function previewStadium(ctx,skin){
+  ctx.fillStyle=skin.sky;ctx.fillRect(0,0,152,70);
+  ctx.fillStyle=skin.stand;ctx.fillRect(0,45,152,38);
+  ctx.fillStyle=skin.crowd;ctx.fillRect(0,61,152,20);
+  ctx.fillStyle=skin.turf;ctx.fillRect(0,81,152,47);
+  ctx.strokeStyle="#f2f7eb";ctx.lineWidth=2;ctx.strokeRect(39,63,74,39);
+  ctx.strokeRect(56,73,40,18);
+  ctx.fillStyle="#f7f8d8";ctx.fillRect(38,60,3,43);ctx.fillRect(111,60,3,43);
+  ctx.fillRect(38,60,76,3);
+}
 function makeShopCards(items,ownedKey,selectedKey,drawPreview) {
   return Array.from(items,([id,skin])=>{
     const card=document.createElement("article");
@@ -324,7 +349,8 @@ function makeShopCards(items,ownedKey,selectedKey,drawPreview) {
 
 const shopCards={
   balls:makeShopCards(balls,"owned","selected",previewBall),
-  shirts:makeShopCards(shirts,"ownedShirts","selectedShirt",previewShirt)
+  shirts:makeShopCards(shirts,"ownedShirts","selectedShirt",previewShirt),
+  stadiums:makeShopCards(stadiums,"ownedStadiums","selectedStadium",previewStadium)
 };
 
 function renderShop() {
@@ -606,17 +632,20 @@ for(const name of ["pointercancel","lostpointercapture"])matchField.addEventList
 function showCategory(next) {
   category=next;
   const showShirts=next==="shirts";
-  get("showBalls").setAttribute("aria-pressed",String(!showShirts));
+  const showStadiums=next==="stadiums";
+  get("showBalls").setAttribute("aria-pressed",String(next==="balls"));
   get("showShirts").setAttribute("aria-pressed",String(showShirts));
+  get("showStadiums").setAttribute("aria-pressed",String(showStadiums));
   starterShirt.hidden=!showShirts;
   shopItems.replaceChildren(...shopCards[category].map(({card})=>card));
   shopItems.scrollTop=0;
-  shopNote.textContent=showShirts?"Her forma 40 altın. Seçtiğin formayı kaleci giyer.":"Aldığın top hemen oyuna girer.";
+  shopNote.textContent=showStadiums?"Satın aldığın stadyum oyun sahasında hemen kullanılır.":showShirts?"Her forma 40 altın. Seçtiğin formayı kaleci giyer.":"Aldığın top hemen oyuna girer.";
   renderShop();
 }
 
 get("showBalls").addEventListener("click",()=>showCategory("balls"));
 get("showShirts").addEventListener("click",()=>showCategory("shirts"));
+get("showStadiums").addEventListener("click",()=>showCategory("stadiums"));
 starterShirt.addEventListener("click",()=>{
   updateProfile(current=>({...current,selectedShirt:null}));
   shopNote.textContent="Kaleci ilk formasını giydi.";
