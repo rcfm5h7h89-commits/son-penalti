@@ -459,7 +459,7 @@ function renderMatch() {
   get("matchDirections").hidden=s.phase!=="defend";
   get("matchKick").hidden=s.phase!=="player";
   get("restartMatch").hidden=s.phase!=="done";
-  get("restartMatch").textContent=tournamentOutcome==="advanced"?"Yeni Tur":tournamentOutcome==="draw"?"Turu tekrar oyna":tournamentOutcome==="champion"?"Yeni turnuva":"Tekrar oyna";
+  get("restartMatch").textContent=tournamentOutcome==="advanced"?(tournament.stage===1?"Yarı Finale Geçiş →":"Finale Geçiş →"):tournamentOutcome==="draw"?"Turu tekrar oyna":tournamentOutcome==="champion"?"🏆 Yeni Turnuvaya Geçiş":"Tekrar oyna";
   matchDirections.forEach(button=>button.disabled=s.phase!=="defend");
   if(!matchAnimation)renderMatchField();
 }
