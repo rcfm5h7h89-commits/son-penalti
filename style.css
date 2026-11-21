@@ -178,3 +178,17 @@ button{cursor:pointer;font:inherit;min-height:42px;color:var(--text);background:
   .panel .aim button{min-height:clamp(50px,7dvh,70px)}
   .panel .submit{grid-column:2;grid-row:4;min-height:clamp(65px,9dvh,85px)}
 }
+
+/* Screenshot-verified correction: inherited align-items:start kept the lower panel narrow. */
+@media(max-width:740px){
+  .page{width:100%;padding-left:8px;padding-right:8px}
+  .layout{width:100%;display:flex;flex-direction:column;align-items:stretch!important;min-height:calc(100dvh - 112px)}
+  .layout > .pitch,.layout > .panel{align-self:stretch!important;width:100%!important;max-width:none!important;min-width:0!important}
+  .layout > .panel{
+    flex:1 0 auto!important;
+    min-height:max(390px,48dvh)!important;
+    padding:14px 14px max(18px,env(safe-area-inset-bottom))!important;
+    box-sizing:border-box;
+    align-content:space-between;
+  }
+}
