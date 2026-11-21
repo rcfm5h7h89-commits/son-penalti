@@ -348,6 +348,20 @@ function renderShop() {
 }
 
 let matchState=null;
+let tournament=null;
+const tournamentStages=["Çeyrek final","Yarı final","Final"];
+function startTournament(){
+ tournament={stage:0,wins:0};
+ get("tournamentDialog").close();
+ startMatch();
+}
+function updateTournamentUI(){
+ const banner=get("tournamentBanner");
+ banner.hidden=!tournament;
+ if(tournament) banner.textContent="🏆 "+tournamentStages[tournament.stage]+" · "+tournament.wins+"/3 galibiyet";
+ get("matchReward").textContent=tournament?"🏆 Turnuva şampiyonluğu: 100 altın":"Kazanan: 30 altın · Beraberlik: 10 altın";
+}
+
 const matchLog=get("matchLog");
 const matchField=get("matchField");
 const mc=matchField.getContext("2d");
@@ -422,6 +436,7 @@ function animateMatch(kind,end,keeperEnd,done,duration=650,keeperHeight=200,shot
 }
 function renderMatch() {
   if(!matchState) return;
+  updateTournamentUI();
   const s=matchState;
   get("robotName").textContent=s.robotName;
   get("matchPlayerScore").textContent=s.playerGoals;
@@ -463,7 +478,24 @@ function finishMatch() {
   if(s.playerGoals>s.robotGoals){reward=30;message="Maçı kazandın! 30 altın senin!";}
   else if(s.playerGoals===s.robotGoals){reward=10;message="Berabere! 10 altın kazandın.";}
   s.phase="done";s.status=message;
-  if(reward)updateProfile(current=>({...current,gold:current.gold+reward}));
+  if(tournament){
+    if(s.playerGoals>s.robotGoals){
+      tournament.wins++;
+      if(tournament.wins===3){
+        updateProfile(current=>({...current,gold:current.gold+100}));
+        s.status="🏆 Şampiyon oldun! 100 altın kazandın!";
+        tournament=null;
+      } else {
+        tournament.stage++;
+        s.status="🏆 Tur atladın! "+tournamentStages[tournament.stage]+" seni bekliyor.";
+      }
+    }else if(s.playerGoals===s.robotGoals){
+      s.status="Berabere! Aynı turu tekrar oyna.";
+    }else{
+      s.status="Turnuvadan elendin! Yeniden katılabilirsin.";
+      tournament=null;
+    }
+  } else if(reward)updateProfile(current=>({...current,gold:current.gold+reward}));
   renderMatch();
 }
 function aimMatch(x,y) {
@@ -521,7 +553,9 @@ function defendMatch(direction) {
     },950);
   },mix(.9,.44,(68-20)/80)*1000,200,68);
 }
-get("openMatch").addEventListener("click",startMatch);
+get("openMatch").addEventListener("click",()=>{tournament=null;startMatch();});
+get("openTournament").addEventListener("click",()=>get("tournamentDialog").showModal());
+get("startTournament").addEventListener("click",startTournament);
 get("closeMatch").addEventListener("click",()=>matchDialog.close());
 matchDialog.addEventListener("close",()=>{clearMatchTimer();matchAnimation=null;matchGesture=null;});
 get("restartMatch").addEventListener("click",startMatch);
