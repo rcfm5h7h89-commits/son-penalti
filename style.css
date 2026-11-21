@@ -157,3 +157,24 @@ button{cursor:pointer;font:inherit;min-height:42px;color:var(--text);background:
   .panel .aim button{min-height:clamp(50px,7.5dvh,72px)}
   .panel .submit{min-height:clamp(65px,10dvh,88px)}
 }
+
+/* Final mobile panel sizing: actually occupy the viewport down to the bottom. */
+@media(max-width:740px){
+  html,body{min-height:100%;height:auto;overflow-y:auto}
+  .page{box-sizing:border-box;min-height:100dvh;height:auto;max-height:none;display:flex;flex-direction:column;width:100%;padding:6px 4px max(4px,env(safe-area-inset-bottom))}
+  .mast{flex:0 0 auto}
+  .layout{flex:1 0 auto;display:flex;flex-direction:column;min-height:calc(100dvh - 115px);gap:4px}
+  .pitch{flex:0 0 auto;width:100%}
+  .panel{
+    box-sizing:border-box;flex:1 0 auto;width:100%;max-width:100%;
+    min-height:clamp(370px,48dvh,560px);
+    margin:0;padding:14px 15px max(16px,env(safe-area-inset-bottom));
+    display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    align-content:space-between;gap:8px 10px;
+    border-radius:14px;
+  }
+  .panel .settings{grid-column:1;grid-row:4 / span 2;min-width:0}
+  .panel .aim{width:100%;max-width:100%;gap:5px}
+  .panel .aim button{min-height:clamp(50px,7dvh,70px)}
+  .panel .submit{grid-column:2;grid-row:4;min-height:clamp(65px,9dvh,85px)}
+}
