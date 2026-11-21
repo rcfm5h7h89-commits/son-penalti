@@ -7,7 +7,7 @@
 <meta name="description" content="Son Penaltı. Beş şutluk, giriş gerektirmeyen futbol oyunu.">
 <title>Son Penaltı</title>
 <link rel="stylesheet" href="style.css?v=match-12">
-<script defer src="game.js?v=match-13"></script>
+<script defer src="game.js?v=tournament-1"></script>
 <script defer src="locale.js?v=1"></script>
 </head>
 <body>
@@ -16,6 +16,7 @@
     <div class="title"><span class="logo" aria-hidden="true">⚽︎</span><h1>Son Penaltı</h1></div>
     <div class="mast-actions">
       <button class="reset" id="reset">↻ <span>Yeni seri</span></button>
+      <button class="match-open" id="openTournament" aria-haspopup="dialog">🏆 Turnuva</button>
       <button class="match-open" id="openMatch" aria-haspopup="dialog">🤖 Maç</button>
       <button class="shop-open" id="openShop" aria-haspopup="dialog"><span class="coin" aria-hidden="true"></span>Dükkân</button>
     </div>
@@ -82,6 +83,7 @@
     <b>—</b>
     <div><span id="robotName">Robot</span><strong id="matchRobotScore">0</strong></div>
   </div>
+  <p class="match-round" id="tournamentBanner" hidden></p>
   <p class="match-round" id="matchRound">3 penaltılık karşılaşma</p>
   <canvas id="matchField" width="820" height="510" aria-label="Maç sahası. Şut için kaleye dokun veya topu yukarı kaydır. Robot şutunda kurtarmak istediğin yönü seç."></canvas>
   <p class="match-status" id="matchStatus">İlk penaltını kullanmak için kaleye nişan al.</p>
@@ -93,6 +95,12 @@
   <button type="button" class="match-kick" id="matchKick">Şut çek ⚽</button>
   <div class="match-log" id="matchLog" aria-live="polite">Maç başlamak üzere!</div>
   <div class="match-bottom"><p id="matchReward">Kazanan: 30 altın · Beraberlik: 10 altın</p><button type="button" id="restartMatch" hidden>Tekrar oyna</button></div>
+</dialog>
+<dialog id="tournamentDialog" class="shop" aria-labelledby="tournamentTitle">
+ <div class="shop-head"><div><h2 id="tournamentTitle">🏆 Turnuva Modu</h2><p>Çeyrek final → Yarı final → Final</p></div><form method="dialog"><button class="shop-close" aria-label="Kapat">×</button></form></div>
+ <p>Üç rakibi yenerek kupayı kazan! Her tur 3 penaltıdan oluşur. Beraberlikte tur tekrar oynanır. Kaybedersen turnuvadan elenirsin.</p>
+ <p>🏆 Şampiyonluk ödülü: <strong>100 altın</strong></p>
+ <button type="button" class="match-kick" id="startTournament">Turnuvaya başla</button>
 </dialog>
 </body>
 </html>
