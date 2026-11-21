@@ -138,3 +138,22 @@ button{cursor:pointer;font:inherit;min-height:42px;color:var(--text);background:
   .panel .submit{min-height:clamp(65px,10dvh,90px);font-size:clamp(17px,4.5vw,22px)}
   .panel{padding-bottom:12px}
 }
+
+/* Expand the entire lower score/control panel, not just its buttons. */
+@media(max-width:740px){
+  .page{width:calc(100% - 8px);padding-bottom:4px}
+  .layout{gap:4px}
+  .panel{
+    width:100%;max-width:none;
+    margin:0;min-height:clamp(330px,44dvh,490px);
+    padding:clamp(12px,2dvh,18px) clamp(13px,3vw,20px) max(18px,env(safe-area-inset-bottom));
+    align-content:space-between;
+    gap:8px 10px;
+    border-radius:14px;
+  }
+  .panel .score strong{font-size:clamp(30px,4.6dvh,42px)}
+  .panel .attempts li{height:clamp(27px,4dvh,36px)}
+  .panel .aim{width:100%;max-width:none}
+  .panel .aim button{min-height:clamp(50px,7.5dvh,72px)}
+  .panel .submit{min-height:clamp(65px,10dvh,88px)}
+}
