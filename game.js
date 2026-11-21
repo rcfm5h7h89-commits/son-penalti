@@ -783,7 +783,10 @@ powerInput.addEventListener("input",()=>{power=Number(powerInput.value);syncCont
 
 function pointOnField(event) {
   const rect=field.getBoundingClientRect();
-  return {x:(event.clientX-rect.left)*W/rect.width,y:(event.clientY-rect.top)*H/rect.height};
+  const scale=Math.max(rect.width/W,rect.height/H);
+  const shownWidth=W*scale,shownHeight=H*scale;
+  const offsetX=(rect.width-shownWidth)/2,offsetY=(rect.height-shownHeight)/2;
+  return {x:(event.clientX-rect.left-offsetX)/scale,y:(event.clientY-rect.top-offsetY)/scale};
 }
 
 function swipeTarget(point) {
