@@ -97,3 +97,51 @@ button{cursor:pointer;font:inherit;min-height:42px;color:var(--text);background:
 @media(max-width:350px){
   .mast-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+
+/* Compact single-screen layout for the main penalty game on phones. */
+@media (max-width:740px) and (orientation:portrait){
+  html,body{height:100%;overflow:hidden}
+  .page{height:100dvh;max-height:100dvh;overflow:hidden;display:flex;flex-direction:column;gap:5px;padding:max(3px,env(safe-area-inset-top)) 0 max(3px,env(safe-area-inset-bottom))}
+  .mast{flex:0 0 auto;gap:4px;margin:0}
+  .mast .title{gap:5px}
+  .mast .title h1{font-size:clamp(19px,5.4vw,27px)}
+  .mast .logo{width:27px;height:27px;font-size:17px;border-radius:7px}
+  .mast-actions{gap:4px}
+  .mast-actions button,.mast-actions .match-open,.mast-actions .shop-open,.mast-actions .reset{min-height:34px;padding:2px;font-size:clamp(9px,2.4vw,12px)}
+  .layout{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;gap:5px}
+  .pitch{min-height:0;display:flex;flex-direction:column}
+  .pitch-head{flex:0 0 auto;padding:4px 9px;font-size:12px}
+  .pitch-head span{font-size:11px}
+  .pitch .view{flex:1;min-height:0;display:flex;align-items:stretch;justify-content:center}
+  .pitch .view canvas{width:100%;height:100%;min-height:0;aspect-ratio:auto}
+  .pitch-foot{flex:0 0 auto;padding:3px 8px;font-size:10px;line-height:1.15}
+  .panel{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:4px 8px;padding:7px 9px;min-height:0;overflow:visible}
+  .panel .score{grid-column:1/-1;gap:6px}
+  .panel .score h2{font-size:10px}
+  .panel .score strong{font-size:26px}
+  .panel .score .record strong,.panel .score .balance strong{font-size:20px}
+  .panel .total{font-size:12px}
+  .panel .attempts{grid-column:1/-1;margin:0;gap:4px}
+  .panel .attempts li{height:19px;font-size:11px}
+  .panel .reward-rule{grid-column:1/-1;margin:0;font-size:10px;line-height:1.1}
+  .panel .settings{grid-column:1;grid-row:4 / span 2;padding-top:3px;min-width:0}
+  .panel .settings h2,.panel .settings label,.panel .settings output{font-size:11px}
+  .panel .settings label{margin-top:4px}
+  .panel .aim{gap:3px;margin-top:3px}
+  .panel .aim button{min-height:34px;font-size:17px;padding:0}
+  .panel input[type=range]{height:20px;margin:0}
+  .panel .submit{grid-column:2;grid-row:4;min-height:45px;align-self:center;font-size:13px;padding:0 8px}
+  .panel .hint{grid-column:2;grid-row:5;align-self:start;font-size:10px;line-height:1.2;margin:0}
+  .panel .result{grid-column:1/-1;font-size:11px;margin:0;line-height:1.2}
+}
+@media(max-width:350px) and (orientation:portrait){
+  .mast-actions{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .mast-actions button,.mast-actions .match-open,.mast-actions .shop-open,.mast-actions .reset{font-size:9px;min-height:33px}
+}
+@media(max-width:740px) and (max-height:620px) and (orientation:portrait){
+  .pitch-foot,.panel .reward-rule,.panel .hint{font-size:9px}
+  .panel{gap:2px 6px;padding:4px 7px}
+  .panel .score strong{font-size:22px}
+  .panel .attempts li{height:16px}
+  .panel .aim button{min-height:29px}
+}
