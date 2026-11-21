@@ -98,117 +98,32 @@ button{cursor:pointer;font:inherit;min-height:42px;color:var(--text);background:
   .mast-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 
-/* Compact single-screen layout for the main penalty game on phones. */
-@media (max-width:740px) and (orientation:portrait){
-  html,body{height:100%;overflow:hidden}
-  .page{height:100dvh;max-height:100dvh;overflow:hidden;display:flex;flex-direction:column;gap:5px;padding:max(3px,env(safe-area-inset-top)) 0 max(3px,env(safe-area-inset-bottom))}
-  .mast{flex:0 0 auto;gap:4px;margin:0}
-  .mast .title{gap:5px}
-  .mast .title h1{font-size:clamp(19px,5.4vw,27px)}
-  .mast .logo{width:27px;height:27px;font-size:17px;border-radius:7px}
+
+/* Stable mobile layout: canvas uses its intrinsic ratio, never zero height. */
+@media(max-width:740px){
+  html,body{height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
+  .page{height:auto;max-height:none;overflow:visible;display:block;width:calc(100% - 16px);padding:6px 0 14px}
+  .mast{margin-bottom:6px;gap:5px}
+  .mast .title h1{font-size:clamp(18px,5vw,25px)}
   .mast-actions{gap:4px}
-  .mast-actions button,.mast-actions .match-open,.mast-actions .shop-open,.mast-actions .reset{min-height:34px;padding:2px;font-size:clamp(9px,2.4vw,12px)}
-  .layout{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;gap:5px}
-  .pitch{min-height:0;display:flex;flex-direction:column}
-  .pitch-head{flex:0 0 auto;padding:4px 9px;font-size:12px}
-  .pitch-head span{font-size:11px}
-  .pitch .view{flex:1;min-height:0;display:flex;align-items:stretch;justify-content:center}
-  .pitch .view canvas{width:100%;height:100%;min-height:0;aspect-ratio:auto}
-  .pitch-foot{flex:0 0 auto;padding:3px 8px;font-size:10px;line-height:1.15}
-  .panel{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:4px 8px;padding:7px 9px;min-height:0;overflow:visible}
-  .panel .score{grid-column:1/-1;gap:6px}
-  .panel .score h2{font-size:10px}
-  .panel .score strong{font-size:26px}
+  .mast-actions button,.mast-actions .match-open,.mast-actions .shop-open,.mast-actions .reset{min-height:33px;padding:3px;font-size:clamp(9px,2.4vw,12px)}
+  .layout{display:flex;flex-direction:column;gap:5px;min-height:0;height:auto}
+  .pitch{display:block;flex:none;min-height:0;overflow:hidden}
+  .pitch-head{padding:5px 9px}
+  .pitch .view{display:block;position:relative;width:100%;height:auto;min-height:0;overflow:hidden}
+  .pitch .view canvas{display:block;position:static;width:100%;height:auto;min-height:0;max-height:none;aspect-ratio:820/510;object-fit:contain}
+  .pitch-foot{padding:4px 8px;font-size:10px}
+  .panel{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto auto auto auto auto auto;gap:4px 7px;height:auto;min-height:0;overflow:visible;padding:7px 9px}
+  .panel .score,.panel .attempts,.panel .reward-rule,.panel .result{grid-column:1/-1}
+  .panel .score strong{font-size:25px}
   .panel .score .record strong,.panel .score .balance strong{font-size:20px}
-  .panel .total{font-size:12px}
-  .panel .attempts{grid-column:1/-1;margin:0;gap:4px}
-  .panel .attempts li{height:19px;font-size:11px}
-  .panel .reward-rule{grid-column:1/-1;margin:0;font-size:10px;line-height:1.1}
-  .panel .settings{grid-column:1;grid-row:4 / span 2;padding-top:3px;min-width:0}
-  .panel .settings h2,.panel .settings label,.panel .settings output{font-size:11px}
+  .panel .attempts{margin:0}
+  .panel .attempts li{height:20px}
+  .panel .reward-rule{margin:0;font-size:10px}
+  .panel .settings{grid-column:1;grid-row:4/span 2;padding-top:3px}
   .panel .settings label{margin-top:4px}
-  .panel .aim{gap:3px;margin-top:3px}
+  .panel .aim{grid-template-columns:repeat(4,minmax(0,1fr));gap:3px}
   .panel .aim button{min-height:34px;font-size:17px;padding:0}
-  .panel input[type=range]{height:20px;margin:0}
-  .panel .submit{grid-column:2;grid-row:4;min-height:45px;align-self:center;font-size:13px;padding:0 8px}
-  .panel .hint{grid-column:2;grid-row:5;align-self:start;font-size:10px;line-height:1.2;margin:0}
-  .panel .result{grid-column:1/-1;font-size:11px;margin:0;line-height:1.2}
-}
-@media(max-width:350px) and (orientation:portrait){
-  .mast-actions{grid-template-columns:repeat(4,minmax(0,1fr))}
-  .mast-actions button,.mast-actions .match-open,.mast-actions .shop-open,.mast-actions .reset{font-size:9px;min-height:33px}
-}
-@media(max-width:740px) and (max-height:620px) and (orientation:portrait){
-  .pitch-foot,.panel .reward-rule,.panel .hint{font-size:9px}
-  .panel{gap:2px 6px;padding:4px 7px}
-  .panel .score strong{font-size:22px}
-  .panel .attempts li{height:16px}
-  .panel .aim button{min-height:29px}
-}
-/* Refined original one-screen layout: retain the classic four-across aiming buttons. */
-@media(max-width:740px) and (orientation:portrait){
-  .layout{grid-template-rows:minmax(0,1fr) auto;gap:5px}
-  .panel{gap:5px 8px;padding:9px 10px}
-  .panel .aim{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
-  .panel .aim button{min-height:39px;font-size:19px}
-  .panel .submit{min-height:51px;font-size:15px}
-  .panel .attempts li{height:22px}
-  .panel .score strong{font-size:28px}
-}
-@media(max-width:740px) and (max-height:620px) and (orientation:portrait){
-  .panel{gap:2px 6px;padding:5px 8px}
-  .panel .aim button{min-height:32px}
-  .panel .submit{min-height:43px}
-  .panel .attempts li{height:17px}
-}
-
-/* Fill the dark unused middle area without changing the familiar control order. */
-@media(max-width:740px) and (orientation:portrait){
-  .layout{grid-template-rows:minmax(0,1fr) minmax(220px,0.78fr);gap:3px}
-  .pitch,.panel{min-height:0}
-  .pitch .view{flex:1;min-height:0;overflow:hidden}
-  .pitch .view canvas{display:block;width:100%;height:100%;object-fit:fill}
-  .panel{height:100%;align-content:space-evenly;grid-template-rows:auto auto auto minmax(0,1fr) auto auto;gap:3px 8px;padding:7px 10px}
-  .panel .settings{display:flex;flex-direction:column;justify-content:center;gap:4px;min-height:0}
-  .panel .aim{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
-  .panel .aim button{min-height:clamp(37px,5.5dvh,49px);font-size:21px}
-  .panel .submit{align-self:stretch;min-height:clamp(50px,8dvh,72px);font-size:clamp(15px,2.4dvh,19px)}
-  .panel .attempts li{height:clamp(21px,3.2dvh,28px)}
-}
-@media(max-width:740px) and (max-height:650px) and (orientation:portrait){
-  .layout{grid-template-rows:minmax(0,1fr) minmax(200px,0.85fr)}
-  .panel{padding:4px 8px;gap:2px 6px}
-  .panel .aim button{min-height:32px}
-  .panel .submit{min-height:44px}
-  .panel .attempts li{height:18px}
-}
-
-/* Slightly extend the goal screen downward while preserving the classic controls. */
-@media(max-width:740px) and (orientation:portrait){
-  .layout{grid-template-rows:minmax(0,1.13fr) minmax(210px,0.72fr)}
-  .pitch .view{flex:1;min-height:0}
-  .pitch .view canvas{height:100%;width:100%}
-}
-@media(max-width:740px) and (max-height:650px) and (orientation:portrait){
-  .layout{grid-template-rows:minmax(0,1.07fr) minmax(190px,0.78fr)}
-}
-
-/* Fill the entire goal viewport at its original 820:510 proportions. */
-@media(max-width:740px) and (orientation:portrait){
-  .pitch .view{width:100%;height:100%;min-height:0;overflow:hidden;background:#1b4939}
-  .pitch .view canvas{display:block;width:100%;height:100%;aspect-ratio:auto;object-fit:cover;object-position:center center}
-  .layout{gap:0}
-}
-
-
-/* Visible mobile playfield: explicit aspect-ratio prevents zero-height canvas. */
-@media(max-width:740px) and (orientation:portrait){
-  .layout{grid-template-rows:minmax(0,1fr) auto;gap:4px}
-  .pitch{display:flex;flex-direction:column;min-height:0;overflow:hidden}
-  .pitch .view{display:block;position:relative;flex:1 1 auto;min-height:160px;height:auto;overflow:hidden;background:#174b38}
-  .pitch .view canvas{position:relative;inset:auto;display:block;width:100%;height:100%;min-height:160px;aspect-ratio:auto;object-fit:cover;object-position:center}
-  .panel{height:auto;align-content:initial;grid-template-rows:auto auto auto auto auto auto}
-}
-@media(max-width:740px) and (max-height:650px) and (orientation:portrait){
-  .pitch .view,.pitch .view canvas{min-height:115px}
+  .panel .submit{grid-column:2;grid-row:4;min-height:48px;align-self:center;font-size:14px}
+  .panel .hint{grid-column:2;grid-row:5;font-size:10px;margin:0}
 }
