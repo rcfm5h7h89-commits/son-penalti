@@ -459,7 +459,7 @@ function renderMatch() {
   get("matchDirections").hidden=s.phase!=="defend";
   get("matchKick").hidden=s.phase!=="player";
   get("restartMatch").hidden=s.phase!=="done";
-  get("restartMatch").textContent=tournamentOutcome==="advanced"?(tournament.stage===1?"Yarı Finale Geçiş →":"Finale Geçiş →"):tournamentOutcome==="draw"?"Turu tekrar oyna":tournamentOutcome==="champion"?"🏆 Yeni Turnuvaya Geçiş":"Tekrar oyna";
+  get("restartMatch").textContent=tournamentOutcome==="advanced"?(tournament.stage===0?"Yarı Finale Geçiş →":"Finale Geçiş →"):tournamentOutcome==="draw"?"Turu tekrar oyna":tournamentOutcome==="champion"?"🏆 Yeni Turnuvaya Geçiş":"Tekrar oyna";
   matchDirections.forEach(button=>button.disabled=s.phase!=="defend");
   if(!matchAnimation)renderMatchField();
 }
@@ -491,9 +491,8 @@ function finishMatch() {
         tournament=null;
         tournamentOutcome="champion";
       } else {
-        tournament.stage++;
         tournamentOutcome="advanced";
-        s.status="🏆 Tur atladın! "+tournamentStages[tournament.stage]+" seni bekliyor.";
+        s.status="🏆 Turu kazandın! "+tournamentStages[tournament.stage+1]+" için aşağıdaki düğmeye bas.";
       }
     }else if(s.playerGoals===s.robotGoals){
       s.status="Berabere! Aynı turu tekrar oyna.";
@@ -568,6 +567,7 @@ get("closeMatch").addEventListener("click",()=>matchDialog.close());
 matchDialog.addEventListener("close",()=>{clearMatchTimer();matchAnimation=null;matchGesture=null;tournament=null;tournamentOutcome="";});
 get("restartMatch").addEventListener("click",()=>{
  if(tournamentOutcome==="champion"){startTournament();return;}
+ if(tournamentOutcome==="advanced"&&tournament){tournament.stage++;}
  tournamentOutcome="";
  startMatch();
 });
