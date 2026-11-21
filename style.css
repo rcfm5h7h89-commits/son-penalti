@@ -207,3 +207,13 @@ button{cursor:pointer;font:inherit;min-height:42px;color:var(--text);background:
     touch-action:pan-y;
   }
 }
+
+/* Reliable full-width power control: give settings its own full panel row. */
+@media(max-width:740px){
+  .layout > .panel{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto auto auto auto auto auto;align-content:space-between}
+  .panel .settings{grid-column:1 / -1!important;grid-row:4!important;width:100%;min-width:0;overflow:visible}
+  .panel .aim{width:100%;max-width:100%;grid-template-columns:repeat(4,minmax(0,1fr))}
+  .panel #power{position:static!important;display:block;width:100%!important;max-width:100%!important;box-sizing:border-box;margin:7px 0 8px;z-index:auto}
+  .panel .submit{grid-column:1 / -1!important;grid-row:5!important;min-height:52px;align-self:stretch}
+  .panel .hint{grid-column:1 / -1!important;grid-row:6!important}
+}
