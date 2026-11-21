@@ -349,9 +349,11 @@ function renderShop() {
 
 let matchState=null;
 let tournament=null;
+let tournamentOutcome='';
 const tournamentStages=["Çeyrek final","Yarı final","Final"];
 function startTournament(){
  tournament={stage:0,wins:0};
+ tournamentOutcome='';
  get("tournamentDialog").close();
  startMatch();
 }
@@ -457,6 +459,7 @@ function renderMatch() {
   get("matchDirections").hidden=s.phase!=="defend";
   get("matchKick").hidden=s.phase!=="player";
   get("restartMatch").hidden=s.phase!=="done";
+  get("restartMatch").textContent=tournamentOutcome==="advanced"?"Sonraki tura geç →":tournamentOutcome==="draw"?"Turu tekrar oyna":tournamentOutcome==="champion"?"Yeni turnuva":"Tekrar oyna";
   matchDirections.forEach(button=>button.disabled=s.phase!=="defend");
   if(!matchAnimation)renderMatchField();
 }
@@ -478,6 +481,7 @@ function finishMatch() {
   if(s.playerGoals>s.robotGoals){reward=30;message="Maçı kazandın! 30 altın senin!";}
   else if(s.playerGoals===s.robotGoals){reward=10;message="Berabere! 10 altın kazandın.";}
   s.phase="done";s.status=message;
+  tournamentOutcome="";
   if(tournament){
     if(s.playerGoals>s.robotGoals){
       tournament.wins++;
@@ -485,14 +489,18 @@ function finishMatch() {
         updateProfile(current=>({...current,gold:current.gold+100}));
         s.status="🏆 Şampiyon oldun! 100 altın kazandın!";
         tournament=null;
+        tournamentOutcome="champion";
       } else {
         tournament.stage++;
+        tournamentOutcome="advanced";
         s.status="🏆 Tur atladın! "+tournamentStages[tournament.stage]+" seni bekliyor.";
       }
     }else if(s.playerGoals===s.robotGoals){
       s.status="Berabere! Aynı turu tekrar oyna.";
+      tournamentOutcome="draw";
     }else{
       s.status="Turnuvadan elendin! Yeniden katılabilirsin.";
+      tournamentOutcome="eliminated";
       tournament=null;
     }
   } else if(reward)updateProfile(current=>({...current,gold:current.gold+reward}));
@@ -553,12 +561,16 @@ function defendMatch(direction) {
     },950);
   },mix(.9,.44,(68-20)/80)*1000,200,68);
 }
-get("openMatch").addEventListener("click",()=>{tournament=null;startMatch();});
+get("openMatch").addEventListener("click",()=>{tournament=null;tournamentOutcome="";startMatch();});
 get("openTournament").addEventListener("click",()=>get("tournamentDialog").showModal());
 get("startTournament").addEventListener("click",startTournament);
 get("closeMatch").addEventListener("click",()=>matchDialog.close());
-matchDialog.addEventListener("close",()=>{clearMatchTimer();matchAnimation=null;matchGesture=null;});
-get("restartMatch").addEventListener("click",startMatch);
+matchDialog.addEventListener("close",()=>{clearMatchTimer();matchAnimation=null;matchGesture=null;tournament=null;tournamentOutcome="";});
+get("restartMatch").addEventListener("click",()=>{
+ if(tournamentOutcome==="champion"){startTournament();return;}
+ tournamentOutcome="";
+ startMatch();
+});
 get("matchKick").addEventListener("click",fireMatch);
 matchDirections.forEach(button=>button.addEventListener("click",()=>defendMatch(button.dataset.matchDirection)));
 function matchPoint(event) {
