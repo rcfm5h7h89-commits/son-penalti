@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#0c1717">
 <meta name="description" content="Son Penaltı. Beş şutluk, giriş gerektirmeyen futbol oyunu.">
 <title>Son Penaltı</title>
-<link rel="stylesheet" href="style.css?v=stable-canvas-4">
-<script defer src="game.js?v=goal-cover-1"></script>
+<link rel="stylesheet" href="style.css?v=restore-field-5">
+<script defer src="game.js?v=restore-field-5"></script>
 <script defer src="locale.js?v=1"></script>
 </head>
 <body>
@@ -24,8 +24,8 @@
   <div class="layout">
     <section class="pitch" aria-label="Penaltı sahası">
       <div class="pitch-head"><strong id="counter">Şut 1 / 5</strong><span id="fieldStatus">Top sende</span></div>
-      <div class="view">
-        <canvas id="field" width="820" height="510" aria-label="Penaltı sahası. Kaleye dokunarak nişan alabilir veya topu yukarı doğru kaydırarak şut çekebilirsin."></canvas>
+      <div class="view" style="display:block!important;position:relative!important;height:clamp(220px,52vw,440px)!important;min-height:220px!important;overflow:hidden!important;">
+        <canvas style="display:block!important;position:relative!important;width:100%!important;height:100%!important;min-height:220px!important;object-fit:contain!important;" id="field" width="820" height="510" aria-label="Penaltı sahası. Kaleye dokunarak nişan alabilir veya topu yukarı doğru kaydırarak şut çekebilirsin."></canvas>
         <div id="flash" class="flash" aria-hidden="true" hidden></div>
       </div>
       <div class="pitch-foot">Kaleye dokunarak nişan al veya topu yukarı kaydırarak şut çek.</div>
