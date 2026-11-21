@@ -79,3 +79,21 @@ button{cursor:pointer;font:inherit;min-height:42px;color:var(--text);background:
   .match-scoreboard strong{font-size:32px}
   .match-log{max-height:55px}
 }
+
+/* Mobile header: keep every action visible without horizontal overflow. */
+@media(max-width:740px){
+  .mast{display:flex;flex-direction:column;align-items:stretch;gap:10px;min-width:0}
+  .mast .title{justify-content:center;min-width:0}
+  .mast .title h1{font-size:clamp(24px,7vw,36px);white-space:normal;text-align:center}
+  .mast-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;width:100%;min-width:0}
+  .mast-actions button,.mast-actions .match-open,.mast-actions .shop-open,.mast-actions .reset{
+    display:flex;align-items:center;justify-content:center;gap:3px;
+    width:100%;min-width:0;min-height:44px;padding:5px 3px;
+    font-size:clamp(10px,2.6vw,13px);line-height:1.2;
+    white-space:normal;text-align:center;overflow-wrap:anywhere
+  }
+  .mast-actions .coin{flex-shrink:0;width:10px;height:10px}
+}
+@media(max-width:350px){
+  .mast-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
