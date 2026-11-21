@@ -192,3 +192,18 @@ button{cursor:pointer;font:inherit;min-height:42px;color:var(--text);background:
     align-content:space-between;
   }
 }
+
+/* Extend only the shot-power slider toward the right edge on phones. */
+@media(max-width:740px){
+  .panel .settings{overflow:visible}
+  .panel #power{
+    display:block;
+    width:calc(200% + 10px);
+    max-width:calc(100vw - 46px);
+    box-sizing:border-box;
+    position:relative;
+    z-index:2;
+    margin-top:8px;
+    touch-action:pan-y;
+  }
+}
