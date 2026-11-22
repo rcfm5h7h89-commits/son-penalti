@@ -1108,11 +1108,6 @@ function drawFree(progress=null,freeShot=null){
   fc.drawImage(background,0,0);
   const moving=progress!==null&&freeShot!==null;
   const travel=moving?clamp(progress,0,1):0;
-  // Detailed five-player defensive wall, styled like the corner-mode footballer.
-  for(const [i,x] of [335,370,405,440,475].entries()){
-    const jump=moving&&travel>.18&&travel<.7?Math.sin((travel-.18)/.52*Math.PI)*15:0;
-    drawFreeWallPlayer(fc,x,347-jump,i,jump>0);
-  }
   if(moving&&freeShot.wallBlocked){
     // Follow the original shot until the wall, then bounce down and sideways.
     const hitAt=.57;
@@ -1145,6 +1140,13 @@ function drawFree(progress=null,freeShot=null){
       410,moving?freeShot.keeperX:410,moving?clamp(freeShot.y,163,239):241,
       moving?(freeShot.keeperX<410?-1.05:1.05):0,
       freePower,balls.get(profile.selected)||balls.get("classic"),performance.now()/1000);
+  }
+  // The wall is closer to the camera than the keeper: render it in front,
+  // so the goalkeeper's boots never appear on a defender's head.
+  // Detailed five-player defensive wall, styled like the corner-mode footballer.
+  for(const [i,x] of [335,370,405,440,475].entries()){
+    const jump=moving&&travel>.18&&travel<.7?Math.sin((travel-.18)/.52*Math.PI)*15:0;
+    drawFreeWallPlayer(fc,x,347-jump,i,jump>0);
   }
   if(!moving){
     // High-contrast aim marker, rendered on the free-kick canvas itself.
