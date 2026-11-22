@@ -1080,12 +1080,12 @@ function commentary(message){
   speechSynthesis.cancel();
   // Stretch the goal shout without changing the visible score or other commentary.
   const isGoalShout=/go+l+!|(?:kafa|vole) golü!/i.test(message);
-  const spoken=isGoalShout?"Goooooool!":message;
+  const spoken=isGoalShout?"Gol!":message;
   const speech=new SpeechSynthesisUtterance(spoken);
   speech.lang="tr-TR";
   speech.voice=chooseCommentatorVoice();
   // Slightly slower, lower-pitched delivery than the old high-pitched voice.
-  speech.rate=isGoalShout?.66:.94;speech.pitch=isGoalShout?.9:.82;speech.volume=1;
+  speech.rate=isGoalShout?.90:.94;speech.pitch=isGoalShout?.9:.82;speech.volume=1;
   speechSynthesis.speak(speech);
  }catch(error){console.warn("Spiker:",error);}
 }
