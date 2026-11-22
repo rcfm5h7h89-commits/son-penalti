@@ -224,3 +224,8 @@ button{cursor:pointer;font:inherit;min-height:42px;color:var(--text);background:
 #freeDialog #freePower{display:block;width:100%;margin:8px 0 14px}
 #freeDialog #freeRestart{margin-top:10px;width:100%}
 @media(max-width:740px){.mast-actions{grid-template-columns:repeat(5,minmax(0,1fr))!important}.mast-actions button{font-size:clamp(9px,2.2vw,12px)!important;padding:3px 1px!important}}
+
+/* Make Frikik mode impossible to miss on mobile and desktop. */
+.free-entry{display:block;width:100%;min-height:48px;margin:0 0 10px;border:2px solid #b5f86d;border-radius:12px;background:#235c37;color:#fff;font-weight:800;font-size:17px;cursor:pointer;box-shadow:0 3px 12px #0005}
+.free-entry:focus-visible{outline:3px solid #fff;outline-offset:2px}
+@media(max-width:740px){.mast-actions{grid-template-columns:repeat(4,minmax(0,1fr))!important}.free-entry{min-height:45px;font-size:16px;margin-bottom:7px}}
