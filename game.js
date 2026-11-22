@@ -1053,14 +1053,36 @@ get("freeKick").addEventListener("click",()=>{
 get("freeRestart").addEventListener("click",()=>{freeDialog.close();startFree();});
 
 
-// Optional Turkish match commentary (user-initiated sound).
+// Turkish match commentary. Prefer a locally available masculine voice when provided
+// by the browser/operating system; browser speech voices have no reliable gender API.
 let commentaryOn=false;
+let commentatorVoice=null;
+function chooseCommentatorVoice(){
+ if(!("speechSynthesis" in window))return null;
+ const voices=speechSynthesis.getVoices();
+ const turkish=voices.filter(v=>/^tr([-_]|$)/i.test(v.lang));
+ const maleHints=/\b(male|erkek|cem|tolga|murat|ahmet|mehmet|emre|kerem|yusuf|ali|kaan)\b/i;
+ const femaleHints=/\b(female|kadın|kadin|aylin|filiz|zeynep|elif|esra)\b/i;
+ const preferred=turkish.find(v=>maleHints.test(v.name)&&!femaleHints.test(v.name))
+  ||turkish.find(v=>!femaleHints.test(v.name)&&(/natural|neural|premium|enhanced/i.test(v.name)))
+  ||turkish.find(v=>!femaleHints.test(v.name))
+  ||turkish[0]||null;
+ commentatorVoice=preferred;
+ return preferred;
+}
+if("speechSynthesis" in window){
+ chooseCommentatorVoice();
+ speechSynthesis.addEventListener?.("voiceschanged",chooseCommentatorVoice);
+}
 function commentary(message){
  if(!commentaryOn||!("speechSynthesis" in window))return;
  try{
   speechSynthesis.cancel();
   const speech=new SpeechSynthesisUtterance(message);
-  speech.lang="tr-TR";speech.rate=1.08;speech.pitch=1.08;
+  speech.lang="tr-TR";
+  speech.voice=chooseCommentatorVoice();
+  // Slightly slower, lower-pitched delivery than the old high-pitched voice.
+  speech.rate=.94;speech.pitch=.82;speech.volume=1;
   speechSynthesis.speak(speech);
  }catch(error){console.warn("Spiker:",error);}
 }
@@ -1068,10 +1090,9 @@ get("commentaryToggle").addEventListener("click",()=>{
  commentaryOn=!commentaryOn;
  get("commentaryToggle").textContent=commentaryOn?"🔊 Spiker Açık":"🔇 Spiker Kapalı";
  get("commentaryToggle").setAttribute("aria-pressed",String(commentaryOn));
- if(commentaryOn)commentary("Son Penaltı maçına hoş geldiniz!");
+ if(commentaryOn)commentary("Son Penaltı maçına hoş geldiniz! Harika bir mücadele bizi bekliyor.");
  else if("speechSynthesis" in window)speechSynthesis.cancel();
 });
-
 
 // Corner mode: cross to a central attacker, then choose a header or volley.
 const cornerDialog=get("cornerDialog"),cornerCanvas=get("cornerField"),cc=cornerCanvas.getContext("2d");
