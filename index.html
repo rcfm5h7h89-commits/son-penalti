@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#0c1717">
 <meta name="description" content="Son Penaltı. Beş şutluk, giriş gerektirmeyen futbol oyunu.">
 <title>Son Penaltı</title>
-<link rel="stylesheet" href="style.css?v=power-row-11">
-<script defer src="game.js?v=stadium-shop-12"></script>
+<link rel="stylesheet" href="style.css?v=free-kick-13">
+<script defer src="game.js?v=free-kick-13"></script>
 <script defer src="locale.js?v=1"></script>
 </head>
 <body>
@@ -16,6 +16,7 @@
     <div class="title"><span class="logo" aria-hidden="true">⚽︎</span><h1>Son Penaltı</h1></div>
     <div class="mast-actions">
       <button class="reset" id="reset">↻ <span>Yeni seri</span></button>
+      <button class="match-open" id="openFree" aria-haspopup="dialog">🎯 Frikik</button>
       <button class="match-open" id="openTournament" aria-haspopup="dialog">🏆 Turnuva</button>
       <button class="match-open" id="openMatch" aria-haspopup="dialog">🤖 Maç</button>
       <button class="shop-open" id="openShop" aria-haspopup="dialog"><span class="coin" aria-hidden="true"></span>Dükkân</button>
@@ -55,6 +56,16 @@
     </section>
   </div>
 </main>
+<dialog id="freeDialog" class="match-dialog" aria-labelledby="freeTitle">
+ <div class="match-head"><div><p class="match-kicker">YENİ MOD</p><h2 id="freeTitle">🎯 Frikik Modu</h2></div><form method="dialog"><button class="shop-close" aria-label="Frikiği kapat">×</button></form></div>
+ <p id="freeScore" class="match-round">Gol: 0 / 0 · Kalan: 5</p>
+ <canvas id="freeField" width="820" height="510" aria-label="Frikik sahası, kaleye dokunarak nişan al"></canvas>
+ <p id="freeStatus" class="match-status" role="status">Barajın yanından veya üzerinden nişan al.</p>
+ <label class="free-power" for="freePower">Şut gücü <output id="freePowerText">%68</output></label>
+ <input id="freePower" type="range" min="20" max="100" value="68">
+ <button type="button" id="freeKick" class="match-kick">⚽ Frikik Çek</button>
+ <button type="button" id="freeRestart" class="reset">↻ Yeniden Oyna</button>
+</dialog>
 <dialog id="shop" class="shop" aria-labelledby="shopTitle">
   <div class="shop-head">
     <div>
