@@ -255,3 +255,9 @@ button{cursor:pointer;font:inherit;min-height:42px;color:var(--text);background:
 @keyframes free-keeper-dive{0%,25%{transform:translate(-50%,-50%) rotate(0deg)}100%{transform:translate(calc(-50% + var(--free-keeper-x)),-25%) rotate(65deg)}}
 
 #freeDialog #freeField{display:block!important;flex:0 0 auto!important;width:100%!important;height:auto!important;min-height:160px!important;aspect-ratio:820/510!important;visibility:visible!important}
+
+/* Large readable result overlay on the free-kick pitch. */
+.free-field-wrap{position:relative;width:100%;flex:0 0 auto;min-height:0}
+.free-field-wrap #freeField{width:100%!important}
+.free-outcome{position:absolute;z-index:8;left:50%;top:42%;transform:translate(-50%,-50%);padding:12px 24px;border-radius:18px;background:rgba(6,22,25,.83);border:3px solid #f7e94e;color:#fff;font-size:clamp(24px,6vw,52px);font-weight:900;text-align:center;white-space:nowrap;text-shadow:0 3px 5px #000;pointer-events:none;box-shadow:0 8px 30px #0008}
+.free-outcome[hidden]{display:none!important}
