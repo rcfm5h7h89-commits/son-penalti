@@ -499,6 +499,11 @@ function startMatch() {
     status:"Kaleye dokunarak nişan al veya topu yukarı kaydırarak şut çek."};
   if(!matchDialog.open)matchDialog.showModal();
   renderMatch();
+  // Opening a match is a direct user action: enable and start the announcer here.
+  if(!commentaryOn) {
+   commentaryOn=true;
+   syncCommentaryButtons();
+  }
   commentary(tournament?"Turnuvada "+tournamentStages[tournament.stage]+" başlıyor!":"Maç başlıyor! Üç penaltılık heyecan dolu mücadele!");
 }
 function finishMatch() {
@@ -1093,13 +1098,16 @@ function commentary(message){
   speechSynthesis.speak(speech);
  }catch(error){console.warn("Spiker:",error);}
 }
-function toggleCommentary(){
- commentaryOn=!commentaryOn;
+function syncCommentaryButtons(){
  for(const id of ["commentaryToggle","matchCommentaryToggle"]){
   const button=get(id);
   button.textContent=commentaryOn?"🔊 Spiker Açık":"🔇 Spiker Kapalı";
   button.setAttribute("aria-pressed",String(commentaryOn));
  }
+}
+function toggleCommentary(){
+ commentaryOn=!commentaryOn;
+ syncCommentaryButtons();
  if(commentaryOn)commentary(matchDialog.open?(tournament?"Turnuva spikeri hazır!":"Maç spikeri hazır!"):"Son Penaltı maçına hoş geldiniz! Harika bir mücadele bizi bekliyor.");
  else if("speechSynthesis" in window)speechSynthesis.cancel();
 }
