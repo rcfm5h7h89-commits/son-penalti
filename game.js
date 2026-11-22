@@ -67,6 +67,8 @@ background.width=W;background.height=H;
 
 function buildStadium() {
   const g=background.getContext("2d");
+  // Stadium-wide ambient illumination, built once rather than each frame.
+  g.imageSmoothingEnabled=true;
   const sky=g.createLinearGradient(0,0,0,280);
   sky.addColorStop(0,activeStadium.sky);sky.addColorStop(1,activeStadium.skyEnd);
   g.fillStyle=sky;g.fillRect(0,0,W,H);
@@ -178,6 +180,12 @@ function buildStadium() {
   g.restore();
   ellipse(g,spot.x,spot.y+3,5,2.5,"#c4dbc4");
   ellipse(g,410,288,210,15,"#112e2480");
+  // Turf-edge vignette and pitch floodlight spill.
+  g.save();
+  const lightPool=g.createRadialGradient(410,315,45,410,340,510);
+  lightPool.addColorStop(0,"#e6ffd00e");lightPool.addColorStop(.6,"#d0ffd000");lightPool.addColorStop(1,"#03160b45");
+  g.fillStyle=lightPool;g.fillRect(0,247,W,H-247);
+  g.restore();
   drawNet(g);
 }
 
@@ -197,6 +205,18 @@ function drawNet(g) {
     const y=mix(top,bottom,i/11),backY=mix(top+20,265,i/11);
     polygon(g,[[left,y],[253,backY],[567,backY],[right,y]],null,"#e7f7e850",1);
   }
+  // Extra goal depth: rear net supports and subtle woven threads.
+  g.save();
+  g.strokeStyle="#ffffff28";g.lineWidth=.7;
+  for(let i=0;i<=48;i++){
+    const x=mix(left,right,i/48);
+    g.beginPath();g.moveTo(x,top);g.lineTo(mix(253,567,i/48),265);g.stroke();
+  }
+  for(let i=0;i<=22;i++){
+    const y=mix(top,bottom,i/22);
+    g.beginPath();g.moveTo(left,y);g.lineTo(right,y);g.stroke();
+  }
+  g.restore();
   polygon(g,[[left,bottom],[left,top],[right,top],[right,bottom]],null,"#123b37",11);
   polygon(g,[[left,bottom],[left,top],[right,top],[right,bottom]],null,"#eff6eb",7);
 }
@@ -240,6 +260,7 @@ function drawKeeper(x,y,lean,t,ctx=c) {
   ctx.restore();
   ellipse(ctx,0,-28,9,10,"#b56e4f");
   polygon(ctx,[[-9,-30],[-7,-36],[2,-39],[9,-32]],"#3c2e28");
+  // Face and shirt finishing touches, scaled with every goalkeeper.
   ctx.restore();
 }
 
@@ -868,6 +889,14 @@ function drawShotActors(ctx,travel,origin,end,keeperStart,keeperEnd,keeperHeight
   const bx=mix(origin.x,end.x,travel);
   const by=mix(origin.y,end.y,travel)-Math.sin(Math.PI*travel)*(shotPower/4);
   ellipse(ctx,bx,mix(origin.y+8,goal.bottom,travel),mix(25,8,travel),mix(6,2,travel),"#142f2478");
+  // Soft ball trail adds motion without affecting trajectory or scoring.
+  if(travel>.04&&travel<.96){
+    ctx.save();ctx.globalAlpha=.15*(1-travel*.6);
+    const tx=mix(origin.x,end.x,Math.max(0,travel-.055));
+    const ty=mix(origin.y,end.y,Math.max(0,travel-.055))-Math.sin(Math.PI*Math.max(0,travel-.055))*(shotPower/4);
+    ellipse(ctx,tx,ty,mix(18,6,travel),mix(18,6,travel),"#f0fff2");
+    ctx.restore();
+  }
   drawBall(ctx,bx,by,mix(22,7,travel),travel*13,skin);
 }
 function draw() {
