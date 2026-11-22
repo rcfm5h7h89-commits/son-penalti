@@ -915,7 +915,7 @@ function drawFree(progress=null,freeShot=null){
     }
   }else{
     drawShotActors(fc,travel,spot,moving?{x:freeShot.x,y:freeShot.y}:spot,
-      410,moving?freeShot.keeperX:410,moving?freeShot.y:241,
+      410,moving?freeShot.keeperX:410,moving?clamp(freeShot.y,163,239):241,
       moving?(freeShot.keeperX<410?-1.05:1.05):0,
       freePower,balls.get(profile.selected)||balls.get("classic"),performance.now()/1000);
   }
@@ -984,7 +984,7 @@ get("freeKick").addEventListener("click",()=>{
  freeStatus("⚽ Top kaleye gidiyor...");
  function animate(now){
    if(!freeDialog.open){freeAnimation=null;return;}
-   const progress=Math.min(1,(now-start)/1150);
+   const progress=Math.min(1,(now-start)/(mix(.9,.44,(freePower-20)/80)*1000));
    get("freeStatus").textContent="⚽ Şut hareket ediyor · %"+Math.round(progress*100);
    drawFree(progress,shot);
    if(progress<1){freeAnimation=requestAnimationFrame(animate);return;}
