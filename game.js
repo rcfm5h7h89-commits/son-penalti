@@ -1114,23 +1114,58 @@ function cornerButtons(){
 }
 function drawCornerPlayer(action="",progress=0){
  const x=attacker.x,y=attacker.y;
- cc.save();
- // Enlarged, outlined striker so the player remains clearly visible on phones.
- cc.translate(x,y);cc.scale(1.65,1.65);cc.translate(-x,-y);
- cc.lineCap="round";cc.lineJoin="round";
- cc.fillStyle="#071a21";cc.beginPath();cc.ellipse(x,y+48,32,9,0,0,Math.PI*2);cc.fill();
- cc.strokeStyle="#101f29";cc.lineWidth=12;
- cc.beginPath();cc.moveTo(x-7,y+12);cc.lineTo(x-16,y+44);cc.moveTo(x+7,y+12);cc.lineTo(x+16,y+44);cc.stroke();
- cc.strokeStyle="#f6f8ee";cc.lineWidth=11;
- cc.beginPath();cc.moveTo(x-12,y-25);cc.lineTo(x+12,y-25);cc.lineTo(x+9,y+13);cc.lineTo(x-9,y+13);cc.closePath();cc.fillStyle="#e8e8e8";cc.fill();cc.stroke();
- cc.strokeStyle="#e3b48b";cc.lineWidth=9;
- cc.beginPath();cc.moveTo(x-12,y-20);cc.lineTo(x-25,y+(action==="header"?-38:-6));cc.moveTo(x+12,y-20);cc.lineTo(x+25,y-6);cc.stroke();
- cc.fillStyle="#e8b68c";cc.beginPath();cc.arc(x,y-43-(action==="header"?Math.sin(Math.PI*progress)*15:0),13,0,Math.PI*2);cc.fill();
- cc.fillStyle="#222b31";cc.fillRect(x-12,y-55,24,6);
- if(action==="volley"){
-  cc.strokeStyle="#101f29";cc.lineWidth=12;cc.beginPath();cc.moveTo(x+7,y+12);cc.lineTo(x+37,y-15-Math.sin(Math.PI*progress)*26);cc.stroke();
+ const p=clamp(progress,0,1),kick=Math.sin(Math.PI*p);
+ const jump=action==="header"?kick*18:0;
+ const legLift=action==="volley"?kick*32:0;
+ const c=cc;
+ c.save();c.translate(x,y);c.scale(1.65,1.65);
+ c.lineCap="round";c.lineJoin="round";
+ // Grounding shadow, softened to keep the character readable on mobile.
+ c.save();c.globalAlpha=.32;c.fillStyle="#07121b";c.beginPath();c.ellipse(0,50,33-jump*.35,9-jump*.08,0,0,Math.PI*2);c.fill();c.restore();
+ c.translate(0,-jump);
+ // Legs, socks and studded football boots.
+ function limb(points,width,color,edge="#15222c"){
+  c.beginPath();c.moveTo(points[0],points[1]);
+  for(let i=2;i<points.length;i+=2)c.lineTo(points[i],points[i+1]);
+  c.strokeStyle=edge;c.lineWidth=width+3;c.stroke();
+  c.strokeStyle=color;c.lineWidth=width;c.stroke();
  }
- cc.restore();
+ limb([-8,11,-12,27,-17,43],11,"#263f74");
+ limb([8,11,14,27,18+legLift*.8,43-legLift],11,"#263f74");
+ limb([-15,36,-17,44],8,"#f5f5f4");
+ limb([16+legLift*.7,35-legLift,18+legLift*.8,43-legLift],8,"#f5f5f4");
+ limb([-17,44,-24,46],8,"#f0bb33","#111d25");
+ limb([18+legLift*.8,43-legLift,27+legLift*.8,45-legLift],8,"#f0bb33","#111d25");
+ // Arms and skin, shaded separately from the jersey.
+ limb([-14,-22,-23,-8,-26,6],9,"#c98a62");
+ limb([14,-22,23,-9,26,-1-(action==="header"?kick*24:0)],9,"#c98a62");
+ c.fillStyle="#f2c19c";
+ for(const hand of [[-26,6],[26,-1-(action==="header"?kick*24:0)]]){
+  c.beginPath();c.arc(hand[0],hand[1],5,0,Math.PI*2);c.fill();
+ }
+ // Shirt silhouette with cloth highlights, side seams and number.
+ const shirt=c.createLinearGradient(-17,-29,17,13);
+ shirt.addColorStop(0,"#ffffff");shirt.addColorStop(.55,"#e6f0fa");shirt.addColorStop(1,"#9db7ce");
+ c.beginPath();c.moveTo(-13,-30);c.lineTo(13,-30);c.lineTo(17,-16);c.lineTo(11,13);c.lineTo(-11,13);c.lineTo(-17,-16);c.closePath();
+ c.fillStyle=shirt;c.fill();c.strokeStyle="#23354b";c.lineWidth=2.5;c.stroke();
+ c.fillStyle="#1d477a";c.fillRect(-11,7,22,6);
+ c.strokeStyle="#2c6aa2";c.lineWidth=2.5;
+ c.beginPath();c.moveTo(-13,-28);c.lineTo(-15,-16);c.moveTo(13,-28);c.lineTo(15,-16);c.stroke();
+ c.font="900 19px system-ui";c.textAlign="center";c.textBaseline="middle";
+ c.lineWidth=1.5;c.strokeStyle="#ffffff";c.strokeText("9",0,-8);
+ c.fillStyle="#183c69";c.fillText("9",0,-8);
+ // Neck, head, ears, face and sculpted hairstyle.
+ c.fillStyle="#c98a62";c.fillRect(-5,-34,10,9);
+ const skin=c.createLinearGradient(-13,-57,12,-35);
+ skin.addColorStop(0,"#f3c8a4");skin.addColorStop(1,"#b97954");
+ c.fillStyle=skin;c.beginPath();c.ellipse(0,-45,12.5,15,0,0,Math.PI*2);c.fill();
+ c.fillStyle="#d69b76";c.beginPath();c.arc(-12,-44,3.4,0,Math.PI*2);c.arc(12,-44,3.4,0,Math.PI*2);c.fill();
+ c.fillStyle="#17202a";c.beginPath();c.moveTo(-12,-49);c.quadraticCurveTo(-14,-64,1,-61);c.quadraticCurveTo(14,-61,13,-48);c.lineTo(9,-53);c.lineTo(4,-51);c.lineTo(-3,-55);c.lineTo(-11,-50);c.closePath();c.fill();
+ c.fillStyle="#23313c";c.beginPath();c.arc(-4,-44,1.4,0,Math.PI*2);c.arc(5,-44,1.4,0,Math.PI*2);c.fill();
+ c.strokeStyle="#9a573e";c.lineWidth=1.3;c.beginPath();c.moveTo(-3,-37);c.quadraticCurveTo(1,-35,5,-38);c.stroke();
+ // Jersey sheen and a tiny badge.
+ c.fillStyle="#e0ac37";c.beginPath();c.arc(9,-23,3,0,Math.PI*2);c.fill();
+ c.restore();
 }
 function drawCorner(now=performance.now()){
  cc.drawImage(background,0,0);
