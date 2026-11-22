@@ -878,7 +878,7 @@ function drawFree(progress=null,shot=null){
   const moving=progress!==null&&shot;
   const t=moving?smooth(Math.min(1,progress)):0;
   const ballX=moving?mix(410,shot.x,t):410;
-  const ballY=moving?mix(438,shot.y,t)-Math.sin(Math.PI*t)*Math.max(12,35*(1-t)):438;
+  const ballY=moving?mix(438,shot.y,t)-Math.sin(Math.PI*t)*90:438;
   const wall=[335,370,405,440,475];
   for(const x of wall){
     const jump=moving&&t>.23&&t<.67?Math.sin((t-.23)/.44*Math.PI)*15:0;
@@ -888,10 +888,11 @@ function drawFree(progress=null,shot=null){
   }
   const dive=moving?smooth(Math.max(0,Math.min(1,(t-.36)/.5))):0;
   const keeperX=moving?mix(410,shot.keeperX,dive):410;
-  const lean=moving?(shot.keeperX<410?-0.7:0.7)*dive:0;
-  drawKeeper(keeperX,241+12*dive,lean,performance.now()/1000,fc);
+  const lean=moving?(shot.keeperX<410?-1.05:1.05)*dive:0;
+  drawKeeper(keeperX,241+25*dive,lean,performance.now()/1000,fc);
   const skin=balls.get(profile.selected)||balls.get("classic");
-  const radius=moving?mix(19,9,t):19;
+  const radius=moving?mix(22,11,t):22;
+  if(moving){fc.save();fc.strokeStyle="#fff6ac";fc.lineWidth=7*(1-t)+2;fc.lineCap="round";fc.globalAlpha=.75;fc.beginPath();fc.moveTo(mix(410,shot.x,Math.max(0,t-.13)),mix(438,shot.y,Math.max(0,t-.13))-Math.sin(Math.PI*Math.max(0,t-.13))*90);fc.lineTo(ballX,ballY);fc.stroke();fc.restore();}
   drawBall(fc,ballX,ballY,radius,t*12,skin);
   if(!moving){
     fc.strokeStyle="#ffed68";fc.lineWidth=3;fc.beginPath();fc.arc(freeAim.x,freeAim.y,13,0,Math.PI*2);fc.stroke();
@@ -934,7 +935,7 @@ get("freeKick").addEventListener("click",()=>{
  freeStatus("⚽ Top kaleye gidiyor...");
  function animate(now){
    if(!freeDialog.open){freeAnimation=null;return;}
-   const progress=Math.min(1,(now-start)/950);
+   const progress=Math.min(1,(now-start)/1650);
    drawFree(progress,shot);
    if(progress<1){freeAnimation=requestAnimationFrame(animate);return;}
    freeAnimation=null;
