@@ -242,3 +242,14 @@ button{cursor:pointer;font:inherit;min-height:42px;color:var(--text);background:
 #freeDialog #freeField{display:block!important;flex:0 0 auto!important;flex-shrink:0!important;width:100%!important;height:auto!important;min-height:160px!important;aspect-ratio:820 / 510!important;object-fit:fill!important;visibility:visible!important;opacity:1!important}
 #freeDialog .match-head,#freeDialog #freeScore,#freeDialog #freeStatus,#freeDialog .free-power,#freeDialog #freePower,#freeDialog #freeKick,#freeDialog #freeRestart{flex-shrink:0!important}
 #freeDialog #freeKick{position:sticky;bottom:0;z-index:2;min-height:48px!important}
+
+/* Dedicated visual movement layer: visible independently of canvas redraws. */
+#freeDialog .free-scene{position:relative!important;flex:0 0 auto!important;width:100%!important;aspect-ratio:820/510;min-height:160px;overflow:hidden;border-radius:10px}
+#freeDialog .free-scene #freeField{width:100%!important;height:100%!important;min-height:0!important;display:block!important}
+.free-ball-overlay,.free-keeper-overlay{position:absolute;pointer-events:none;z-index:5;display:none;will-change:transform,opacity}
+.free-ball-overlay{left:50%;top:85.9%;font-size:clamp(24px,6vw,42px);transform:translate(-50%,-50%)}
+.free-keeper-overlay{left:50%;top:43%;font-size:clamp(26px,7vw,48px);transform:translate(-50%,-50%)}
+.free-scene.free-shooting .free-ball-overlay{display:block;animation:free-ball-flight 1.65s linear both}
+.free-scene.free-shooting .free-keeper-overlay{display:block;animation:free-keeper-dive 1.65s ease-in-out both}
+@keyframes free-ball-flight{0%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(calc(-50% + var(--free-half-x)),calc(-50% + var(--free-half-y) - 18px)) scale(.75)}100%{transform:translate(calc(-50% + var(--free-target-x)),calc(-50% + var(--free-target-y))) scale(.4)}}
+@keyframes free-keeper-dive{0%,25%{transform:translate(-50%,-50%) rotate(0deg)}100%{transform:translate(calc(-50% + var(--free-keeper-x)),-25%) rotate(65deg)}}
