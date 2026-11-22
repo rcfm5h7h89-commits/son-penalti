@@ -779,15 +779,15 @@ function makeShot(aim,power,keeper,round,random,keeperBoost=false) {
   if(power<33) ends.y+=90-(power-20)*5;
   if(power>93) ends.y-=(power-93)*3.6;
   const inside=ends.x>=goal.left+8&&ends.x<=goal.right-8&&ends.y>=goal.top+8&&ends.y<=goal.bottom-6;
-  const reads=random<(keeperBoost?.45:.39)+round*.05;
-  const reach=(keeperBoost?153:145)-power*.72+round*4;
+  const reads=random<(keeperBoost?.40:.34)+round*.045;
+  const reach=(keeperBoost?147:139)-power*.72+round*4;
   const lateral=ends.x-keeper;
   const guess=random<.78?-reach:reach;
   const stride=reads?clamp(lateral,-reach,reach):guess;
   const dive=clamp(keeper+stride,goal.left+25,goal.right-25);
   const lean=clamp((dive-keeper)/92,-1,1);
   const height=clamp(ends.y,163,239);
-  const saved=inside&&Math.abs(ends.x-dive)<(keeperBoost?43:39)&&Math.abs(ends.y-height)<33;
+  const saved=inside&&Math.abs(ends.x-dive)<(keeperBoost?39:35)&&Math.abs(ends.y-height)<33;
   const postHit=ends.y>=goal.top-11&&ends.y<=goal.bottom+8&&
     (Math.abs(ends.x-goal.left)<12||Math.abs(ends.x-goal.right)<12||Math.abs(ends.y-goal.top)<10);
   const outcome=postHit?"post":inside?saved?"save":"goal":"miss";
@@ -1042,8 +1042,8 @@ get("freeKick").addEventListener("click",()=>{
  freeBusy=true;get("freeKick").disabled=true;
  if(freeShots===4)commentary("Frikikte kritik son şut!");
  get("freeOutcome").hidden=true;
- const x=freeAim.x+(Math.random()-.5)*(105-freePower)*1.3;
- const y=freeAim.y+(Math.random()-.5)*(105-freePower)*.9;
+ const x=freeAim.x+(Math.random()-.5)*(105-freePower)*1.05;
+ const y=freeAim.y+(Math.random()-.5)*(105-freePower)*.72;
  const wallBlocked=y>225&&x>322&&x<488;
  // Frikik kalecisi: slightly better at reading the shot, but still beatable.
  // React to the incoming ball's actual direction, not a random prediction.
@@ -1335,7 +1335,7 @@ function cornerFinish(type){
  stopCornerFrame();
  const accuracy=0;
  const contact=true;
- const spread=(type==="header"?75:65)+accuracy*95;
+ const spread=(type==="header"?61:54)+accuracy*95;
  const x=cornerAim.x+(Math.random()-.5)*spread;
  const y=cornerAim.y+(type==="header"?-9:12)+(Math.random()-.5)*spread*.65;
  const post=contact&&y>=goal.top-10&&y<=goal.bottom+8&&(Math.abs(x-goal.left)<12||Math.abs(x-goal.right)<12||Math.abs(y-goal.top)<10);
