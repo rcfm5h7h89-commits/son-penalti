@@ -1090,7 +1090,11 @@ function cornerButtons(){
 }
 function drawCornerPlayer(action="",progress=0){
  const x=attacker.x,y=attacker.y;
- cc.save();cc.lineCap="round";cc.lineJoin="round";
+ cc.save();
+ // Enlarged, outlined striker so the player remains clearly visible on phones.
+ cc.translate(x,y);cc.scale(1.65,1.65);cc.translate(-x,-y);
+ cc.lineCap="round";cc.lineJoin="round";
+ cc.fillStyle="#071a21";cc.beginPath();cc.ellipse(x,y+48,32,9,0,0,Math.PI*2);cc.fill();
  cc.strokeStyle="#101f29";cc.lineWidth=12;
  cc.beginPath();cc.moveTo(x-7,y+12);cc.lineTo(x-16,y+44);cc.moveTo(x+7,y+12);cc.lineTo(x+16,y+44);cc.stroke();
  cc.strokeStyle="#f6f8ee";cc.lineWidth=11;
@@ -1112,6 +1116,10 @@ function drawCorner(now=performance.now()){
  const keeperX=strike?mix(410,cornerAction.keeperX,smooth(clamp((cornerAction.t-.15)/.85,0,1))):410+Math.sin(now/600)*30;
  drawKeeper(keeperX,241,strike?clamp((cornerAction.keeperX-410)/100,-1,1):0,now/1000,cc);
  drawCornerPlayer(strike?cornerAction.type:"",strike?cornerAction.t:0);
+ cc.save();cc.font="900 24px system-ui";cc.textAlign="center";cc.lineWidth=5;
+ cc.strokeStyle="#0c2025";cc.fillStyle="#faffb3";
+ cc.strokeText("OYUNCU",attacker.x,attacker.y+92);
+ cc.fillText("OYUNCU",attacker.x,attacker.y+92);cc.restore();
  let bx=cornerOrigin.x,by=cornerOrigin.y,r=22;
  if(flight){
   const t=clamp((now-cornerCross.begin)/cornerCross.duration,0,1);
