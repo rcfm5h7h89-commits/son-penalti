@@ -261,3 +261,8 @@ button{cursor:pointer;font:inherit;min-height:42px;color:var(--text);background:
 .free-field-wrap #freeField{width:100%!important}
 .free-outcome{position:absolute;z-index:8;left:50%;top:42%;transform:translate(-50%,-50%);padding:12px 24px;border-radius:18px;background:rgba(6,22,25,.83);border:3px solid #f7e94e;color:#fff;font-size:clamp(24px,6vw,52px);font-weight:900;text-align:center;white-space:nowrap;text-shadow:0 3px 5px #000;pointer-events:none;box-shadow:0 8px 30px #0008}
 .free-outcome[hidden]{display:none!important}
+
+/* Corner controls and critical shot feedback */
+#cornerField{width:100%;height:auto;display:block;aspect-ratio:820/510;object-fit:contain;touch-action:manipulation;cursor:crosshair}
+#commentaryToggle{font-size:12px;white-space:nowrap}
+@media(max-width:740px){.mast-actions{flex-wrap:wrap;justify-content:flex-end}#commentaryToggle{font-size:11px}}
