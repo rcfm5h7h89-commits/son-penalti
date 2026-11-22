@@ -905,6 +905,7 @@ function freeStatus(message){
 }
 function startFree(){
  if(freeAnimation!==null){cancelAnimationFrame(freeAnimation);freeAnimation=null;}
+ get("freeScene").classList.remove("free-shooting");
  freeShots=0;freeGoals=0;freeBusy=false;freeAim={x:410,y:185};
  get("freeKick").disabled=false;
  freeStatus("Barajın yanından veya üzerinden nişan al.");
@@ -932,6 +933,16 @@ get("freeKick").addEventListener("click",()=>{
  const scored=goalIn&&!wallBlocked&&!saved;
  const shot={x,y,keeperX};
  const start=performance.now();
+ const scene=get("freeScene");
+ const ballOverlay=get("freeBallOverlay"),keeperOverlay=get("freeKeeperOverlay");
+ scene.classList.remove("free-shooting");
+ ballOverlay.style.setProperty("--free-target-x",((x-410)/820*100)+"%");
+ ballOverlay.style.setProperty("--free-half-x",((x-410)/820*50)+"%");
+ ballOverlay.style.setProperty("--free-half-y",((y-438)/510*50)+"%");
+ ballOverlay.style.setProperty("--free-target-y",((y-438)/510*100)+"%");
+ keeperOverlay.style.setProperty("--free-keeper-x",((keeperX-410)/820*100)+"%");
+ void scene.offsetWidth;
+ scene.classList.add("free-shooting");
  freeStatus("⚽ Top kaleye gidiyor...");
  function animate(now){
    if(!freeDialog.open){freeAnimation=null;return;}
@@ -940,6 +951,7 @@ get("freeKick").addEventListener("click",()=>{
    drawFree(progress,shot);
    if(progress<1){freeAnimation=requestAnimationFrame(animate);return;}
    freeAnimation=null;
+   scene.classList.remove("free-shooting");
    freeShots++;if(scored)freeGoals++;
    freeStatus(wallBlocked?"🧱 Top baraja çarptı!":scored?"⚽ GOL!":saved?"🧤 Kaleci kurtardı!":"Şut dışarı gitti!");
    if(freeShots===5){
