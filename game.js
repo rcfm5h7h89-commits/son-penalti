@@ -1093,13 +1093,18 @@ function commentary(message){
   speechSynthesis.speak(speech);
  }catch(error){console.warn("Spiker:",error);}
 }
-get("commentaryToggle").addEventListener("click",()=>{
+function toggleCommentary(){
  commentaryOn=!commentaryOn;
- get("commentaryToggle").textContent=commentaryOn?"🔊 Spiker Açık":"🔇 Spiker Kapalı";
- get("commentaryToggle").setAttribute("aria-pressed",String(commentaryOn));
- if(commentaryOn)commentary("Son Penaltı maçına hoş geldiniz! Harika bir mücadele bizi bekliyor.");
+ for(const id of ["commentaryToggle","matchCommentaryToggle"]){
+  const button=get(id);
+  button.textContent=commentaryOn?"🔊 Spiker Açık":"🔇 Spiker Kapalı";
+  button.setAttribute("aria-pressed",String(commentaryOn));
+ }
+ if(commentaryOn)commentary(matchDialog.open?(tournament?"Turnuva spikeri hazır!":"Maç spikeri hazır!"):"Son Penaltı maçına hoş geldiniz! Harika bir mücadele bizi bekliyor.");
  else if("speechSynthesis" in window)speechSynthesis.cancel();
-});
+}
+get("commentaryToggle").addEventListener("click",toggleCommentary);
+get("matchCommentaryToggle").addEventListener("click",toggleCommentary);
 
 // Corner mode: cross to a central attacker, then choose a header or volley.
 const cornerDialog=get("cornerDialog"),cornerCanvas=get("cornerField"),cc=cornerCanvas.getContext("2d");
