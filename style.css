@@ -232,3 +232,6 @@ button{cursor:pointer;font:inherit;min-height:42px;color:var(--text);background:
 
 /* Frikik sits directly left of Turnuva in the header on every screen. */
 @media(max-width:740px){.mast-actions{grid-template-columns:repeat(5,minmax(0,1fr))!important}.mast-actions button{font-size:clamp(9px,2.2vw,12px)!important}}
+
+/* Four header actions after removing Yeni seri button. */
+@media(max-width:740px){.mast-actions{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
