@@ -266,3 +266,5 @@ button{cursor:pointer;font:inherit;min-height:42px;color:var(--text);background:
 #cornerField{width:100%;height:auto;display:block;aspect-ratio:820/510;object-fit:contain;touch-action:manipulation;cursor:crosshair}
 #commentaryToggle{font-size:12px;white-space:nowrap}
 @media(max-width:740px){.mast-actions{flex-wrap:wrap;justify-content:flex-end}#commentaryToggle{font-size:11px}}
+
+.corner-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0}.corner-actions button{min-height:48px;font-weight:850}.corner-actions button:disabled{opacity:.38}
