@@ -971,9 +971,12 @@ get("freeKick").addEventListener("click",()=>{
  // Frikik kalecisi: slightly better at reading the shot, but still beatable.
  // React to the incoming ball's actual direction, not a random prediction.
  // The keeper starts in the centre and dives toward the shot as it approaches.
- const keeperX=clamp(x,goal.left+25,goal.right-25);
  const keeperReach=122;
- const saved=Math.abs(x-410)<=keeperReach&&Math.abs(x-keeperX)<53&&y>145&&y<275;
+ // The visible dive and the save check must use the SAME reachable position.
+ // Previously the keeper was drawn on top of far-corner shots but the
+ // separate distance-from-centre rule still incorrectly awarded a goal.
+ const keeperX=clamp(x,410-keeperReach,410+keeperReach);
+ const saved=Math.abs(x-keeperX)<=53&&y>145&&y<275;
  const goalIn=x>goal.left+12&&x<goal.right-12&&y>goal.top+10&&y<goal.bottom-10;
  const scored=goalIn&&!wallBlocked&&!saved;
  const shot={x,y,keeperX,wallBlocked,bounceDirection:Math.random()<.5?-1:1};
