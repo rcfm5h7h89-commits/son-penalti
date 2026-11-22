@@ -1073,87 +1073,152 @@ get("commentaryToggle").addEventListener("click",()=>{
 });
 
 
-// Corner mode: curved deliveries from the corner toward goal.
+// Corner mode: cross to a central attacker, then choose a header or volley.
 const cornerDialog=get("cornerDialog"),cornerCanvas=get("cornerField"),cc=cornerCanvas.getContext("2d");
-let cornerShots=0,cornerGoals=0,cornerAim={x:410,y:188},cornerPower=68,cornerBusy=false,cornerFrame=null;
-const cornerOrigin={x:85,y:440};
+const cornerOrigin={x:85,y:440},attacker={x:410,y:327};
+let cornerShots=0,cornerGoals=0,cornerAim={x:410,y:188},cornerPower=68;
+let cornerPhase="ready",cornerFrame=null,cornerCross=null,cornerAction=null;
+const cornerHead=get("cornerHead"),cornerVolley=get("cornerVolley"),cornerKick=get("cornerKick");
 function cornerStatus(message){
  get("cornerScore").textContent="Gol: "+cornerGoals+" / "+cornerShots+" · Kalan: "+(5-cornerShots);
  get("cornerStatus").textContent=message;
 }
-function drawCorner(progress=null,shotData=null){
- cc.drawImage(background,0,0);
- cc.save();
- cc.strokeStyle="#ffffffaa";cc.lineWidth=3;cc.beginPath();cc.arc(70,445,42,-Math.PI/2,0);cc.stroke();cc.restore();
- const moving=progress!==null&&shotData!==null;
- const t=moving?clamp(progress,0,1):0;
- const keeperX=moving?mix(410,shotData.keeperX,smooth(clamp((t-.12)/.88,0,1))):410+Math.sin(performance.now()/600)*32;
- drawKeeper(keeperX,241,moving?clamp((shotData.keeperX-410)/100,-1,1):0,performance.now()/1000,cc);
- let bx=cornerOrigin.x,by=cornerOrigin.y;
- if(moving){
-   bx=mix(cornerOrigin.x,shotData.x,t)+Math.sin(Math.PI*t)*100;
-   by=mix(cornerOrigin.y,shotData.y,t)-Math.sin(Math.PI*t)*(65+cornerPower*.35);
-   if(shotData.post&&t>.83){const d=(t-.83)/.17;bx+=(shotData.x<410?110:-110)*d;by+=90*d*d;}
- }else{
-   cc.strokeStyle="#ffed6d";cc.lineWidth=3;cc.beginPath();cc.arc(cornerAim.x,cornerAim.y,19,0,Math.PI*2);cc.stroke();
-   cc.beginPath();cc.moveTo(cornerAim.x-25,cornerAim.y);cc.lineTo(cornerAim.x+25,cornerAim.y);cc.moveTo(cornerAim.x,cornerAim.y-25);cc.lineTo(cornerAim.x,cornerAim.y+25);cc.stroke();
- }
- drawBall(cc,bx,by,mix(22,8,t),t*12,balls.get(profile.selected)||balls.get("classic"));
+function cornerButtons(){
+ cornerKick.disabled=cornerPhase!=="ready";
+ cornerHead.disabled=cornerPhase!=="cross";
+ cornerVolley.disabled=cornerPhase!=="cross";
 }
+function drawCornerPlayer(action="",progress=0){
+ const x=attacker.x,y=attacker.y;
+ cc.save();cc.lineCap="round";cc.lineJoin="round";
+ cc.strokeStyle="#101f29";cc.lineWidth=12;
+ cc.beginPath();cc.moveTo(x-7,y+12);cc.lineTo(x-16,y+44);cc.moveTo(x+7,y+12);cc.lineTo(x+16,y+44);cc.stroke();
+ cc.strokeStyle="#f6f8ee";cc.lineWidth=11;
+ cc.beginPath();cc.moveTo(x-12,y-25);cc.lineTo(x+12,y-25);cc.lineTo(x+9,y+13);cc.lineTo(x-9,y+13);cc.closePath();cc.fillStyle="#e8e8e8";cc.fill();cc.stroke();
+ cc.strokeStyle="#e3b48b";cc.lineWidth=9;
+ cc.beginPath();cc.moveTo(x-12,y-20);cc.lineTo(x-25,y+(action==="header"?-38:-6));cc.moveTo(x+12,y-20);cc.lineTo(x+25,y-6);cc.stroke();
+ cc.fillStyle="#e8b68c";cc.beginPath();cc.arc(x,y-43-(action==="header"?Math.sin(Math.PI*progress)*15:0),13,0,Math.PI*2);cc.fill();
+ cc.fillStyle="#222b31";cc.fillRect(x-12,y-55,24,6);
+ if(action==="volley"){
+  cc.strokeStyle="#101f29";cc.lineWidth=12;cc.beginPath();cc.moveTo(x+7,y+12);cc.lineTo(x+37,y-15-Math.sin(Math.PI*progress)*26);cc.stroke();
+ }
+ cc.restore();
+}
+function drawCorner(now=performance.now()){
+ cc.drawImage(background,0,0);
+ cc.save();cc.strokeStyle="#ffffffaa";cc.lineWidth=3;cc.beginPath();cc.arc(70,445,42,-Math.PI/2,0);cc.stroke();cc.restore();
+ const flight=cornerPhase==="cross"&&cornerCross;
+ const strike=cornerPhase==="strike"&&cornerAction;
+ const keeperX=strike?mix(410,cornerAction.keeperX,smooth(clamp((cornerAction.t-.15)/.85,0,1))):410+Math.sin(now/600)*30;
+ drawKeeper(keeperX,241,strike?clamp((cornerAction.keeperX-410)/100,-1,1):0,now/1000,cc);
+ drawCornerPlayer(strike?cornerAction.type:"",strike?cornerAction.t:0);
+ let bx=cornerOrigin.x,by=cornerOrigin.y,r=22;
+ if(flight){
+  const t=clamp((now-cornerCross.begin)/cornerCross.duration,0,1);
+  bx=mix(cornerOrigin.x,attacker.x,t)+Math.sin(Math.PI*t)*95;
+  by=mix(cornerOrigin.y,attacker.y-43,t)-Math.sin(Math.PI*t)*(80+cornerPower*.3);
+  r=mix(22,12,t);
+ }else if(strike){
+  const t=cornerAction.t;
+  bx=mix(attacker.x,cornerAction.x,t);
+  by=mix(attacker.y-(cornerAction.type==="header"?58:7),cornerAction.y,t)-Math.sin(Math.PI*t)*(cornerAction.type==="header"?24:35);
+  if(cornerAction.post&&t>.83){const d=(t-.83)/.17;bx+=(cornerAction.x<410?95:-95)*d;by+=100*d*d;}
+  r=mix(13,7,t);
+ }else if(cornerPhase==="ready"){
+  cc.save();cc.strokeStyle="#ffed6d";cc.lineWidth=3;cc.beginPath();cc.arc(cornerAim.x,cornerAim.y,19,0,Math.PI*2);cc.stroke();
+  cc.beginPath();cc.moveTo(cornerAim.x-25,cornerAim.y);cc.lineTo(cornerAim.x+25,cornerAim.y);cc.moveTo(cornerAim.x,cornerAim.y-25);cc.lineTo(cornerAim.x,cornerAim.y+25);cc.stroke();cc.restore();
+ }else if(cornerPhase==="cross"){bx=attacker.x;by=attacker.y-43;r=12;}
+ drawBall(cc,bx,by,r,now/75,balls.get(profile.selected)||balls.get("classic"));
+ if(cornerShots===4&&cornerPhase!=="done"){
+  cc.save();cc.fillStyle="#fff0a8";cc.font="bold 26px system-ui";cc.textAlign="center";cc.fillText("🔥 KRİTİK SON KORNER",410,50);cc.restore();
+ }
+ if(cornerPhase==="result"||cornerPhase==="done"){
+  const label=cornerAction?.label||"";
+  cc.save();cc.font="900 53px system-ui";cc.textAlign="center";cc.lineWidth=8;cc.strokeStyle="#12221d";cc.fillStyle="#fff5a1";cc.strokeText(label,410,260);cc.fillText(label,410,260);cc.restore();
+ }
+}
+function stopCornerFrame(){if(cornerFrame!==null){cancelAnimationFrame(cornerFrame);cornerFrame=null;}}
 function startCorner(){
- if(cornerFrame!==null){cancelAnimationFrame(cornerFrame);cornerFrame=null;}
- cornerShots=0;cornerGoals=0;cornerBusy=false;cornerAim={x:410,y:188};
- get("cornerKick").disabled=false;get("cornerOutcome").hidden=true;
- cornerStatus("Kaleye dokunarak kornerin yönünü seç.");
+ stopCornerFrame();cornerShots=0;cornerGoals=0;cornerAim={x:410,y:188};
+ cornerPhase="ready";cornerCross=null;cornerAction=null;
+ get("cornerOutcome").hidden=true;cornerButtons();
+ cornerStatus("Önce orta aç, sonra gelen topa Kafa veya Vole ile vur!");
  if(!cornerDialog.open)cornerDialog.showModal();
  drawCorner();
 }
 get("openCorner").addEventListener("click",startCorner);
 get("cornerRestart").addEventListener("click",()=>{cornerDialog.close();startCorner();});
+cornerDialog.addEventListener("close",()=>{stopCornerFrame();cornerPhase="ready";});
 get("cornerPower").addEventListener("input",event=>{
  cornerPower=Number(event.target.value);get("cornerPowerText").textContent="%"+cornerPower;
 });
 cornerCanvas.addEventListener("pointerdown",event=>{
- if(cornerBusy||cornerShots>=5)return;
- const rect=cornerCanvas.getBoundingClientRect();
- const scale=Math.min(rect.width/W,rect.height/H);
+ if(cornerPhase!=="ready")return;
+ const rect=cornerCanvas.getBoundingClientRect(),scale=Math.min(rect.width/W,rect.height/H);
  const left=(rect.width-W*scale)/2,top=(rect.height-H*scale)/2;
  cornerAim={x:clamp((event.clientX-rect.left-left)/scale,goal.left-15,goal.right+15),
  y:clamp((event.clientY-rect.top-top)/scale,goal.top-15,goal.bottom+15)};
  drawCorner();
 });
-get("cornerKick").addEventListener("click",()=>{
- if(cornerBusy||cornerShots>=5)return;
- cornerBusy=true;get("cornerKick").disabled=true;get("cornerOutcome").hidden=true;
- if(cornerShots===4)commentary("Kornerde kritik son şut!");
- const x=cornerAim.x+(Math.random()-.5)*(105-cornerPower)*1.2;
- const y=cornerAim.y+(Math.random()-.5)*(105-cornerPower);
- const post=y>=goal.top-10&&y<=goal.bottom+8&&(Math.abs(x-goal.left)<12||Math.abs(x-goal.right)<12||Math.abs(y-goal.top)<10);
- const inside=x>goal.left+8&&x<goal.right-8&&y>goal.top+8&&y<goal.bottom-8;
- const keeperX=clamp(x,315,505);
- const saved=inside&&!post&&Math.abs(x-keeperX)<44&&y>164&&y<259&&Math.random()<.63;
- const scored=inside&&!post&&!saved;
- const shotData={x,y,keeperX,post,saved,scored};
- const begin=performance.now(),duration=mix(1050,620,(cornerPower-20)/80);
- function animate(now){
+cornerKick.addEventListener("click",()=>{
+ if(cornerPhase!=="ready")return;
+ cornerPhase="cross";cornerButtons();get("cornerOutcome").hidden=true;
+ if(cornerShots===4)commentary("Son korner! Kritik an!");
+ cornerStatus("🚩 Orta geliyor! Kafa veya Vole tuşuna bas!");
+ cornerCross={begin:performance.now(),duration:mix(1350,950,(cornerPower-20)/80)};
+ function crossFrame(now){
   if(!cornerDialog.open){cornerFrame=null;return;}
-  const t=Math.min(1,(now-begin)/duration);
-  drawCorner(t,shotData);
-  if(t<1){cornerFrame=requestAnimationFrame(animate);return;}
-  cornerFrame=null;cornerShots++;if(scored)cornerGoals++;
-  const label=post?"🥅 DİREK!":saved?"🧤 KURTARIŞ!":scored?"⚽ GOOOL!":"❌ DIŞARI!";
-  cornerStatus(label+(cornerShots===5?" Seri tamamlandı!":""));
-  const result=get("cornerOutcome");result.textContent=label;result.hidden=false;
-  commentary(post?"Top direkten döndü!":saved?"Kaleci kurtardı!":scored?"Kornerden harika gol!":"Korner dışarı gitti!");
-  const end=performance.now();
-  function hold(now){
-   if(!cornerDialog.open){cornerFrame=null;return;}
-   drawCorner(1,shotData);
-   cc.save();cc.font="900 55px system-ui";cc.textAlign="center";cc.fillStyle="#fff5a1";cc.strokeStyle="#12221d";cc.lineWidth=8;cc.strokeText(label,410,255);cc.fillText(label,410,255);cc.restore();
-   if(now-end<1700)cornerFrame=requestAnimationFrame(hold);
-   else{cornerFrame=null;if(cornerShots<5){cornerBusy=false;get("cornerKick").disabled=false;result.hidden=true;drawCorner();}}
-  }
-  cornerFrame=requestAnimationFrame(hold);
+  drawCorner(now);
+  if(cornerPhase!=="cross"){cornerFrame=null;return;}
+  if(now-cornerCross.begin>=cornerCross.duration){
+   cornerFrame=null;cornerPhase="result";cornerAction={label:"❌ KAÇIRDI!"};
+   finishCorner(false,"Topa dokunamadın!");
+  }else cornerFrame=requestAnimationFrame(crossFrame);
  }
- cornerFrame=requestAnimationFrame(animate);
+ cornerFrame=requestAnimationFrame(crossFrame);
 });
+function finishCorner(scored,message){
+ cornerShots++;if(scored)cornerGoals++;
+ const endOfSeries=cornerShots>=5;
+ cornerStatus(message+(endOfSeries?" Seri tamamlandı!":""));
+ get("cornerOutcome").textContent=cornerAction?.label||message;
+ get("cornerOutcome").hidden=false;
+ cornerPhase=endOfSeries?"done":"result";cornerButtons();drawCorner();
+ const currentShots=cornerShots;
+ setTimeout(()=>{
+  if(!cornerDialog.open||cornerShots!==currentShots||cornerPhase!=="result")return;
+  cornerPhase="ready";cornerCross=null;cornerAction=null;
+  get("cornerOutcome").hidden=true;cornerButtons();cornerStatus("Yeni orta için Korner Kullan'a bas.");drawCorner();
+ },1700);
+}
+function cornerFinish(type){
+ if(cornerPhase!=="cross")return;
+ const timing=clamp((performance.now()-cornerCross.begin)/cornerCross.duration,0,1);
+ stopCornerFrame();
+ const accuracy=Math.abs(timing-.82);
+ const contact=accuracy<.31;
+ const spread=(type==="header"?105:90)+accuracy*160;
+ const x=cornerAim.x+(Math.random()-.5)*spread;
+ const y=cornerAim.y+(type==="header"?-9:12)+(Math.random()-.5)*spread*.65;
+ const post=contact&&y>=goal.top-10&&y<=goal.bottom+8&&(Math.abs(x-goal.left)<12||Math.abs(x-goal.right)<12||Math.abs(y-goal.top)<10);
+ const inside=contact&&x>goal.left+8&&x<goal.right-8&&y>goal.top+8&&y<goal.bottom-8;
+ const keeperX=clamp(x,315,505);
+ const saved=inside&&!post&&Math.abs(x-keeperX)<43&&y>164&&y<259&&Math.random()<.55;
+ const scored=inside&&!post&&!saved;
+ cornerAction={type,x,y,post,saved,scored,keeperX,t:0,label:""};
+ cornerPhase="strike";cornerButtons();
+ cornerStatus(type==="header"?"⚽ Kafa vuruşu!":"⚽ Vole vuruşu!");
+ const begin=performance.now(),duration=mix(700,420,(cornerPower-20)/80);
+ function strikeFrame(now){
+  if(!cornerDialog.open){cornerFrame=null;return;}
+  cornerAction.t=Math.min(1,(now-begin)/duration);drawCorner(now);
+  if(cornerAction.t<1){cornerFrame=requestAnimationFrame(strikeFrame);return;}
+  cornerFrame=null;
+  cornerAction.label=!contact?"❌ ISKALADI!":post?"🥅 DİREK!":saved?"🧤 KURTARIŞ!":scored?"⚽ GOOOL!":"❌ DIŞARI!";
+  commentary(!contact?"Oyuncu topu ıskaladı!":post?"Top direkten döndü!":saved?"Kaleci kurtardı!":scored?"Harika bir "+(type==="header"?"kafa golü!":"vole golü!"):"Şut dışarı gitti!");
+  finishCorner(scored,cornerAction.label);
+ }
+ cornerFrame=requestAnimationFrame(strikeFrame);
+}
+cornerHead.addEventListener("click",()=>cornerFinish("header"));
+cornerVolley.addEventListener("click",()=>cornerFinish("volley"));
