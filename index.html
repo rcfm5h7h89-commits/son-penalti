@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#0c1717">
 <meta name="description" content="Son Penaltı. Beş şutluk, giriş gerektirmeyen futbol oyunu.">
 <title>Son Penaltı</title>
-<link rel="stylesheet" href="style.css?v=corner-commentary-35">
-<script defer src="game.js?v=corner-commentary-35"></script>
+<link rel="stylesheet" href="style.css?v=corner-header-volley-36">
+<script defer src="game.js?v=corner-header-volley-36"></script>
 <script defer src="locale.js?v=1"></script>
 </head>
 <body>
@@ -66,6 +66,7 @@
  <label class="free-power" for="cornerPower">Şut gücü <output id="cornerPowerText">%68</output></label>
  <input id="cornerPower" type="range" min="20" max="100" value="68">
  <button type="button" id="cornerKick" class="match-kick">🚩 Korner Kullan</button>
+ <div class="corner-actions"><button type="button" id="cornerHead" class="match-kick" disabled>⚽ Kafa</button><button type="button" id="cornerVolley" class="match-kick" disabled>🔥 Vole</button></div>
  <button type="button" id="cornerRestart" class="reset">↻ Yeniden Oyna</button>
 </dialog>
 <dialog id="freeDialog" class="match-dialog" aria-labelledby="freeTitle">
