@@ -194,6 +194,15 @@ function drawNet(g) {
   polygon(g,[[left-3,bottom],[253,265],[567,265],[right+3,bottom]],"#c2e5da20","#c2e5da8a");
   polygon(g,[[left,top],[253,top+20],[253,265],[left,bottom]],"#b2ddd83a","#b2ddd8aa");
   polygon(g,[[right,top],[567,top+20],[567,265],[right,bottom]],"#b2ddd83a","#b2ddd8aa");
+  // Goal-mouth contact shadows emphasize the 3D net depth.
+  g.save();
+  const depthShadow=g.createLinearGradient(left,top,right,bottom);
+  depthShadow.addColorStop(0,"#061c1b24");
+  depthShadow.addColorStop(.55,"#061c1b00");
+  depthShadow.addColorStop(1,"#061c1b38");
+  g.fillStyle=depthShadow;
+  g.fillRect(left,top,right-left,bottom-top);
+  g.restore();
   const netFill=g.createLinearGradient(0,top,0,bottom);
   netFill.addColorStop(0,"#b6e2d226");netFill.addColorStop(1,"#102f2c77");
   g.fillStyle=netFill;g.fillRect(left,top,right-left,bottom-top);
@@ -223,7 +232,12 @@ function drawNet(g) {
 
 function drawKeeper(x,y,lean,t,ctx=c) {
   const shirt=shirts.get(profile.selectedShirt)??defaultShirt;
-  ellipse(ctx,x,goal.bottom-4,30,5,"#142e23a0");
+  ctx.save();
+  const shadow=ctx.createRadialGradient(x,goal.bottom-4,1,x,goal.bottom-4,42);
+  shadow.addColorStop(0,"#04150c8c");
+  shadow.addColorStop(1,"#04150c00");
+  ellipse(ctx,x,goal.bottom-4,42,10,shadow);
+  ctx.restore();
   ctx.save();ctx.translate(x,y);ctx.rotate(lean);
   const stride=Math.sin(t*10)*3*(1-Math.min(1,Math.abs(lean)));
   ctx.lineCap="round";
@@ -323,7 +337,12 @@ function drawBall(ctx,x,y,r,spin,skin) {
   ctx.save();ctx.translate(x,y);ctx.rotate(spin);
   const color=ctx.createRadialGradient(-r*.27,-r*.38,1,0,0,r);
   color.addColorStop(0,skin.glow);color.addColorStop(.76,skin.base);color.addColorStop(1,skin.edge);
+  // A soft contact rim separates the ball from the stadium background.
+  ctx.save();
+  ctx.shadowColor="#ffffff55";
+  ctx.shadowBlur=Math.min(12,r*.5);
   ellipse(ctx,0,0,r,r,color);
+  ctx.restore();
   if(skin.pattern) {
     drawBallPattern(ctx,r,skin);
   // Specular shine and thin rim give every shop ball a rounder 3D look.
