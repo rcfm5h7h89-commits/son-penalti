@@ -991,6 +991,19 @@ get("freeKick").addEventListener("click",()=>{
    const outcome=get("freeOutcome");
    outcome.textContent=wallBlocked?"🧱 BARAJ!":scored?"⚽ GOOOL!":saved?"🧤 KURTARIŞ!":"❌ DIŞARI!";
    outcome.hidden=false;
+   // Paint the result directly into the visible game canvas as well.
+   // This avoids mobile dialog stacking/layout issues hiding the HTML overlay.
+   fc.save();
+   fc.font="900 62px system-ui, sans-serif";
+   fc.textAlign="center";fc.textBaseline="middle";
+   const resultText=wallBlocked?"BARAJ!":scored?"GOOOL!":saved?"KURTARIŞ!":"DIŞARI!";
+   const labelWidth=Math.min(750,fc.measureText(resultText).width+70);
+   fc.fillStyle="rgba(6,22,25,.88)";
+   fc.fillRect(410-labelWidth/2,190,labelWidth,105);
+   fc.strokeStyle="#ffeb55";fc.lineWidth=5;
+   fc.strokeRect(410-labelWidth/2,190,labelWidth,105);
+   fc.fillStyle="#ffffff";fc.fillText(resultText,410,244);
+   fc.restore();
    if(freeShots===5){
      get("freeStatus").textContent+=" Seri bitti! "+freeGoals+" gol attın.";
    }else setTimeout(()=>{if(!freeDialog.open)return;freeBusy=false;get("freeKick").disabled=false;get("freeOutcome").hidden=true;drawFree();},1250);
