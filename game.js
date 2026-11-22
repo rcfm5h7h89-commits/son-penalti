@@ -891,10 +891,34 @@ function drawFree(progress=null,freeShot=null){
     fc.fillStyle="#e9c5a0";fc.beginPath();fc.arc(x,286-jump,11,0,Math.PI*2);fc.fill();
     fc.fillStyle="#19222b";fc.fillRect(x-10,344-jump,8,28);fc.fillRect(x+2,344-jump,8,28);
   }
-  drawShotActors(fc,travel,spot,moving?{x:freeShot.x,y:freeShot.y}:spot,
-    410,moving?freeShot.keeperX:410,moving?freeShot.y:241,
-    moving?(freeShot.keeperX<410?-1.05:1.05):0,
-    freePower,balls.get(profile.selected)||balls.get("classic"),performance.now()/1000);
+  if(moving&&freeShot.wallBlocked){
+    // Follow the original shot until the wall, then bounce down and sideways.
+    const hitAt=.57;
+    const hitX=mix(spot.x,freeShot.x,hitAt);
+    const hitY=mix(spot.y,freeShot.y,hitAt)-Math.sin(Math.PI*hitAt)*(freePower/4);
+    const after=clamp((travel-hitAt)/(1-hitAt),0,1);
+    const bx=travel<hitAt?mix(spot.x,freeShot.x,travel):hitX+freeShot.bounceDirection*115*after;
+    const by=travel<hitAt?mix(spot.y,freeShot.y,travel)-Math.sin(Math.PI*travel)*(freePower/4):hitY-35*Math.sin(Math.PI*after)+175*after*after;
+    drawKeeper(410,241,0,performance.now()/1000,fc);
+    const skin=balls.get(profile.selected)||balls.get("classic");
+    const size=travel<hitAt?mix(22,13,travel/hitAt):mix(13,16,after);
+    ellipse(fc,bx,Math.min(H-15,by+12),size,4,"#142f2478");
+    drawBall(fc,bx,by,size,travel*16,skin);
+    if(travel>=hitAt&&after<.23){
+      fc.save();fc.strokeStyle="#fff4a2";fc.lineWidth=3;
+      for(let i=0;i<5;i++){
+        const angle=i*Math.PI*2/5;
+        fc.beginPath();fc.moveTo(hitX+Math.cos(angle)*15,hitY+Math.sin(angle)*15);
+        fc.lineTo(hitX+Math.cos(angle)*29,hitY+Math.sin(angle)*29);fc.stroke();
+      }
+      fc.restore();
+    }
+  }else{
+    drawShotActors(fc,travel,spot,moving?{x:freeShot.x,y:freeShot.y}:spot,
+      410,moving?freeShot.keeperX:410,moving?freeShot.y:241,
+      moving?(freeShot.keeperX<410?-1.05:1.05):0,
+      freePower,balls.get(profile.selected)||balls.get("classic"),performance.now()/1000);
+  }
   if(!moving){
     // High-contrast aim marker, rendered on the free-kick canvas itself.
     fc.save();
@@ -946,7 +970,7 @@ get("freeKick").addEventListener("click",()=>{
  const saved=Math.abs(x-keeperX)<42&&y>150&&y<270;
  const goalIn=x>goal.left+12&&x<goal.right-12&&y>goal.top+10&&y<goal.bottom-10;
  const scored=goalIn&&!wallBlocked&&!saved;
- const shot={x,y,keeperX};
+ const shot={x,y,keeperX,wallBlocked,bounceDirection:Math.random()<.5?-1:1};
  const start=performance.now();
  freeStatus("⚽ Top kaleye gidiyor...");
  function animate(now){
