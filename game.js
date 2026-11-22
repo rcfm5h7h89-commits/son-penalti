@@ -896,10 +896,20 @@ function drawFree(progress=null,freeShot=null){
     moving?(freeShot.keeperX<410?-1.05:1.05):0,
     freePower,balls.get(profile.selected)||balls.get("classic"),performance.now()/1000);
   if(!moving){
-    fc.strokeStyle="#e2ff69";fc.lineWidth=2;
-    fc.beginPath();fc.arc(freeAim.x,freeAim.y,12);fc.stroke();
-    polygon(fc,[[freeAim.x-6,freeAim.y],[freeAim.x+6,freeAim.y]],null,"#f7ffaf");
-    polygon(fc,[[freeAim.x,freeAim.y-6],[freeAim.x,freeAim.y+6]],null,"#f7ffaf");
+    // High-contrast aim marker, rendered on the free-kick canvas itself.
+    fc.save();
+    fc.lineWidth=5;fc.strokeStyle="#12221d";
+    fc.beginPath();fc.arc(freeAim.x,freeAim.y,19,0,Math.PI*2);fc.stroke();
+    fc.lineWidth=3;fc.strokeStyle="#fff34f";
+    fc.beginPath();fc.arc(freeAim.x,freeAim.y,19,0,Math.PI*2);fc.stroke();
+    fc.beginPath();
+    fc.moveTo(freeAim.x-29,freeAim.y);fc.lineTo(freeAim.x-9,freeAim.y);
+    fc.moveTo(freeAim.x+9,freeAim.y);fc.lineTo(freeAim.x+29,freeAim.y);
+    fc.moveTo(freeAim.x,freeAim.y-29);fc.lineTo(freeAim.x,freeAim.y-9);
+    fc.moveTo(freeAim.x,freeAim.y+9);fc.lineTo(freeAim.x,freeAim.y+29);
+    fc.stroke();
+    fc.fillStyle="#fff34f";fc.beginPath();fc.arc(freeAim.x,freeAim.y,3.5,0,Math.PI*2);fc.fill();
+    fc.restore();
   }
 }
 
