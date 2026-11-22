@@ -180,6 +180,14 @@ function buildStadium() {
   g.restore();
   ellipse(g,spot.x,spot.y+3,5,2.5,"#c4dbc4");
   ellipse(g,410,288,210,15,"#112e2480");
+  // Pitch boundary highlights and subtle grass reflections.
+  g.save();
+  g.strokeStyle="#dcffd52b";g.lineWidth=1.5;
+  for(let i=0;i<9;i++){
+    const y=294+i*24;
+    g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();
+  }
+  g.restore();
   // Turf-edge vignette and pitch floodlight spill.
   g.save();
   const lightPool=g.createRadialGradient(410,315,45,410,340,510);
@@ -334,40 +342,47 @@ function drawBallPattern(ctx,r,skin) {
 }
 
 function drawBall(ctx,x,y,r,spin,skin) {
-  ctx.save();ctx.translate(x,y);ctx.rotate(spin);
-  const color=ctx.createRadialGradient(-r*.27,-r*.38,1,0,0,r);
-  color.addColorStop(0,skin.glow);color.addColorStop(.76,skin.base);color.addColorStop(1,skin.edge);
-  // A soft contact rim separates the ball from the stadium background.
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.rotate(spin);
+  // Layered spherical shading shared by every ball skin.
+  const base=ctx.createRadialGradient(-r*.3,-r*.4,r*.05,0,0,r);
+  base.addColorStop(0,skin.glow);
+  base.addColorStop(.68,skin.base);
+  base.addColorStop(1,skin.edge);
   ctx.save();
   ctx.shadowColor="#ffffff55";
-  ctx.shadowBlur=Math.min(12,r*.5);
-  ellipse(ctx,0,0,r,r,color);
+  ctx.shadowBlur=Math.min(9,r*.4);
+  ellipse(ctx,0,0,r,r,base);
   ctx.restore();
   if(skin.pattern) {
     drawBallPattern(ctx,r,skin);
-  // Specular shine and thin rim give every shop ball a rounder 3D look.
-  const specular=ctx.createRadialGradient(-r*.42,-r*.52,0,-r*.32,-r*.4,r*.78);
-  specular.addColorStop(0,"#ffffff88");specular.addColorStop(.42,"#ffffff1b");specular.addColorStop(1,"#ffffff00");
-  ellipse(ctx,0,0,r*.96,r*.96,specular);
-  ctx.strokeStyle="#ffffff45";ctx.lineWidth=Math.max(.6,r*.055);
-  ctx.beginPath();ctx.arc(0,0,r*.91,Math.PI*1.08,Math.PI*1.78);ctx.stroke();
-    ctx.restore();
-    return;
-  }
-  const patches=[[0,0,.36],[-.76,.25,.23],[.71,.41,.22],[.2,-.77,.24],[-.26,.76,.21]];
-  patches.forEach(([px,py,size])=>{
-    const points=Array.from({length:5},(_,i)=>{
-      const angle=i*Math.PI*2/5-Math.PI/2;
-      return [(px+Math.cos(angle)*size)*r,(py+Math.sin(angle)*size)*r];
+  } else {
+    const patches=[[0,0,.36],[-.76,.25,.23],[.71,.41,.22],[.2,-.77,.24],[-.26,.76,.21]];
+    patches.forEach(([px,py,size])=>{
+      const points=Array.from({length:5},(_,i)=>{
+        const angle=i*Math.PI*2/5-Math.PI/2;
+        return [(px+Math.cos(angle)*size)*r,(py+Math.sin(angle)*size)*r];
+      });
+      polygon(ctx,points,skin.patch);
     });
-    polygon(ctx,points,skin.patch);
-  });
-  // Specular shine and thin rim give every shop ball a rounder 3D look.
-  const specular=ctx.createRadialGradient(-r*.42,-r*.52,0,-r*.32,-r*.4,r*.78);
-  specular.addColorStop(0,"#ffffff88");specular.addColorStop(.42,"#ffffff1b");specular.addColorStop(1,"#ffffff00");
-  ellipse(ctx,0,0,r*.96,r*.96,specular);
-  ctx.strokeStyle="#ffffff45";ctx.lineWidth=Math.max(.6,r*.055);
-  ctx.beginPath();ctx.arc(0,0,r*.91,Math.PI*1.08,Math.PI*1.78);ctx.stroke();
+  }
+  ctx.save();
+  ctx.beginPath();ctx.arc(0,0,r*.98,0,Math.PI*2);ctx.clip();
+  const sheen=ctx.createRadialGradient(-r*.48,-r*.57,0,-r*.23,-r*.31,r*.9);
+  sheen.addColorStop(0,"#ffffffa8");
+  sheen.addColorStop(.35,"#ffffff22");
+  sheen.addColorStop(1,"#ffffff00");
+  ellipse(ctx,0,0,r,r,sheen);
+  const lowerShade=ctx.createLinearGradient(0,-r,0,r);
+  lowerShade.addColorStop(0,"#ffffff00");
+  lowerShade.addColorStop(.62,"#00000000");
+  lowerShade.addColorStop(1,"#03140b52");
+  ellipse(ctx,0,0,r,r,lowerShade);
+  ctx.restore();
+  ctx.strokeStyle="#ffffff66";
+  ctx.lineWidth=Math.max(.65,r*.055);
+  ctx.beginPath();ctx.arc(0,0,r*.9,Math.PI*1.12,Math.PI*1.72);ctx.stroke();
   ctx.restore();
 }
 
@@ -920,6 +935,17 @@ function drawShotActors(ctx,travel,origin,end,keeperStart,keeperEnd,keeperHeight
 }
 function draw() {
   c.drawImage(background,0,0);
+  // Subtle broadcast-style light glints; drawn at low opacity.
+  c.save();
+  c.globalAlpha=.12+.035*Math.sin(clock*1.7);
+  for(const x of [80,740]){
+    const flare=c.createRadialGradient(x,52,1,x,52,50);
+    flare.addColorStop(0,"#fffde7");
+    flare.addColorStop(.2,"#e7ffda70");
+    flare.addColorStop(1,"#e7ffda00");
+    c.fillStyle=flare;c.fillRect(x-50,2,100,100);
+  }
+  c.restore();
   if(results.length===4&&state!=="done"){
     c.save();c.fillStyle="rgba(105,20,5,.12)";c.fillRect(0,0,W,H);
     c.strokeStyle="#ffb84e";c.lineWidth=9;c.strokeRect(6,6,W-12,H-12);
