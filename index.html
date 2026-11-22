@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#0c1717">
 <meta name="description" content="Son Penaltı. Beş şutluk, giriş gerektirmeyen futbol oyunu.">
 <title>Son Penaltı</title>
-<link rel="stylesheet" href="style.css?v=free-outcome-29">
-<script defer src="game.js?v=keeper-collision-33"></script>
+<link rel="stylesheet" href="style.css?v=corner-commentary-35">
+<script defer src="game.js?v=corner-commentary-35"></script>
 <script defer src="locale.js?v=1"></script>
 </head>
 <body>
@@ -16,6 +16,8 @@
     <div class="title"><span class="logo" aria-hidden="true">⚽︎</span><h1>Son Penaltı</h1></div>
     <div class="mast-actions">
       
+      <button class="match-open" id="openCorner" aria-haspopup="dialog">🚩 Korner</button>
+      <button class="match-open" id="commentaryToggle" type="button" aria-pressed="false">🔇 Spiker Kapalı</button>
       <button class="match-open" id="openFree" aria-haspopup="dialog">🎯 Frikik</button>
       <button class="match-open" id="openTournament" aria-haspopup="dialog">🏆 Turnuva</button>
       <button class="match-open" id="openMatch" aria-haspopup="dialog">🤖 Maç</button>
@@ -56,6 +58,16 @@
     </section>
   </div>
 </main>
+<dialog id="cornerDialog" class="match-dialog" aria-labelledby="cornerTitle">
+ <div class="match-head"><div><p class="match-kicker">YENİ MOD</p><h2 id="cornerTitle">🚩 Korner Modu</h2></div><form method="dialog"><button class="shop-close" aria-label="Korneri kapat">×</button></form></div>
+ <p id="cornerScore" class="match-round">Gol: 0 / 0 · Kalan: 5</p>
+ <div class="free-field-wrap"><canvas id="cornerField" width="820" height="510" aria-label="Korner sahası, kaleye dokunarak nişan al"></canvas><div id="cornerOutcome" class="free-outcome" aria-live="polite" hidden></div></div>
+ <p id="cornerStatus" class="match-status" role="status">Korner için kaleye nişan al.</p>
+ <label class="free-power" for="cornerPower">Şut gücü <output id="cornerPowerText">%68</output></label>
+ <input id="cornerPower" type="range" min="20" max="100" value="68">
+ <button type="button" id="cornerKick" class="match-kick">🚩 Korner Kullan</button>
+ <button type="button" id="cornerRestart" class="reset">↻ Yeniden Oyna</button>
+</dialog>
 <dialog id="freeDialog" class="match-dialog" aria-labelledby="freeTitle">
  <div class="match-head"><div><p class="match-kicker">YENİ MOD</p><h2 id="freeTitle">🎯 Frikik Modu</h2></div><form method="dialog"><button class="shop-close" aria-label="Frikiği kapat">×</button></form></div>
  <p id="freeScore" class="match-round">Gol: 0 / 0 · Kalan: 5</p>
