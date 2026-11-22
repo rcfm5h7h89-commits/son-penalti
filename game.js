@@ -1078,7 +1078,9 @@ function commentary(message){
  if(!commentaryOn||!("speechSynthesis" in window))return;
  try{
   speechSynthesis.cancel();
-  const speech=new SpeechSynthesisUtterance(message);
+  // Stretch the goal shout without changing the visible score or other commentary.
+  const spoken=message.replace(/\bgol(?:ü|u)?\b/giu,word=>/^gol$/i.test(word)?"Gooooll":word);
+  const speech=new SpeechSynthesisUtterance(spoken);
   speech.lang="tr-TR";
   speech.voice=chooseCommentatorVoice();
   // Slightly slower, lower-pitched delivery than the old high-pitched voice.
