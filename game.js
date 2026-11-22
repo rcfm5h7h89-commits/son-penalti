@@ -543,7 +543,7 @@ function fireMatch() {
   const s=matchState;
   if(!s||s.phase!=="player")return;
   const matchPower=Number(powerInput.value);
-  const shot=makeShot(s.aim,matchPower,410,s.round,Math.random());
+  const shot=makeShot(s.aim,matchPower,410,s.round,Math.random(),true);
   const scored=shot.outcome==="goal";
   // Start speech from the actual tap/click: mobile browsers may block delayed speech.
   commentary(scored?"Gol!":shot.outcome==="save"?"Kaleciden müthiş kurtarış!":"Top dışarı çıktı!");
@@ -996,12 +996,9 @@ get("freeKick").addEventListener("click",()=>{
  // Frikik kalecisi: slightly better at reading the shot, but still beatable.
  // React to the incoming ball's actual direction, not a random prediction.
  // The keeper starts in the centre and dives toward the shot as it approaches.
- const keeperReach=122;
- // The visible dive and the save check must use the SAME reachable position.
- // Previously the keeper was drawn on top of far-corner shots but the
- // separate distance-from-centre rule still incorrectly awarded a goal.
- const keeperX=clamp(x,410-keeperReach,410+keeperReach);
- const saved=Math.abs(x-keeperX)<=53&&y>145&&y<275;
+ const keeperShot=makeShot({x,y},clamp(freePower,33,93),410,freeShots,Math.random(),true);
+ const keeperX=keeperShot.dive;
+ const saved=keeperShot.outcome==="save";
  const goalIn=x>goal.left+12&&x<goal.right-12&&y>goal.top+10&&y<goal.bottom-10;
  const postHit=!wallBlocked&&y>=goal.top-10&&y<=goal.bottom+8&&
    (Math.abs(x-goal.left)<13||Math.abs(x-goal.right)<13||Math.abs(y-goal.top)<11);
@@ -1291,8 +1288,9 @@ function cornerFinish(type){
  const y=cornerAim.y+(type==="header"?-9:12)+(Math.random()-.5)*spread*.65;
  const post=contact&&y>=goal.top-10&&y<=goal.bottom+8&&(Math.abs(x-goal.left)<12||Math.abs(x-goal.right)<12||Math.abs(y-goal.top)<10);
  const inside=contact&&x>goal.left+8&&x<goal.right-8&&y>goal.top+8&&y<goal.bottom-8;
- const keeperX=clamp(x,315,505);
- const saved=inside&&!post&&Math.abs(x-keeperX)<43&&y>164&&y<259&&Math.random()<.55;
+ const keeperShot=makeShot({x,y},68,410,cornerShots,Math.random(),true);
+ const keeperX=keeperShot.dive;
+ const saved=inside&&!post&&keeperShot.outcome==="save";
  const scored=inside&&!post&&!saved;
  cornerAction={type,x,y,post,saved,scored,keeperX,t:0,label:""};
  cornerPhase="strike";cornerButtons();
