@@ -765,6 +765,14 @@ function settle() {
   renderBoard();
 }
 
+function drawShotActors(ctx,travel,origin,end,keeperStart,keeperEnd,keeperHeight,keeperLean,shotPower,skin,time){
+  const dive=smooth(clamp((travel-.12)/.88,0,1));
+  drawKeeper(mix(keeperStart,keeperEnd,dive),mix(241,keeperHeight+15,dive),keeperLean*dive*.98,time,ctx);
+  const bx=mix(origin.x,end.x,travel);
+  const by=mix(origin.y,end.y,travel)-Math.sin(Math.PI*travel)*(shotPower/4);
+  ellipse(ctx,bx,mix(origin.y+8,goal.bottom,travel),mix(25,8,travel),mix(6,2,travel),"#142f2478");
+  drawBall(ctx,bx,by,mix(22,7,travel),travel*13,skin);
+}
 function draw() {
   c.drawImage(background,0,0);
   const travel=shot?clamp((clock-shot.begin)/shot.duration,0,1):0;
@@ -872,40 +880,36 @@ requestAnimationFrame(frame);
 const freeDialog=get("freeDialog"),freeCanvas=get("freeField"),fc=freeCanvas.getContext("2d");
 let freeShots=0,freeGoals=0,freeAim={x:410,y:185},freePower=68,freeBusy=false;
 let freeAnimation=null;
-function drawFree(progress=null,shot=null){
-  fc.clearRect(0,0,820,510);
+function drawFree(progress=null,freeShot=null){
+  fc.clearRect(0,0,W,H);
   fc.drawImage(background,0,0);
-  const moving=progress!==null&&shot;
-  const t=moving?smooth(Math.min(1,progress)):0;
-  const ballX=moving?mix(410,shot.x,t):410;
-  const ballY=moving?mix(438,shot.y,t)-Math.sin(Math.PI*t)*90:438;
-  const wall=[335,370,405,440,475];
-  for(const x of wall){
-    const jump=moving&&t>.23&&t<.67?Math.sin((t-.23)/.44*Math.PI)*15:0;
+  const moving=progress!==null&&freeShot!==null;
+  const travel=moving?clamp(progress,0,1):0;
+  for(const x of [335,370,405,440,475]){
+    const jump=moving&&travel>.18&&travel<.7?Math.sin((travel-.18)/.52*Math.PI)*15:0;
     fc.fillStyle="#1a2635";fc.fillRect(x-12,295-jump,24,52);
     fc.fillStyle="#e9c5a0";fc.beginPath();fc.arc(x,286-jump,11,0,Math.PI*2);fc.fill();
     fc.fillStyle="#19222b";fc.fillRect(x-10,344-jump,8,28);fc.fillRect(x+2,344-jump,8,28);
   }
-  const dive=moving?smooth(Math.max(0,Math.min(1,(t-.36)/.5))):0;
-  const keeperX=moving?mix(410,shot.keeperX,dive):410;
-  const lean=moving?(shot.keeperX<410?-1.05:1.05)*dive:0;
-  drawKeeper(keeperX,241+25*dive,lean,performance.now()/1000,fc);
-  const skin=balls.get(profile.selected)||balls.get("classic");
-  const radius=moving?mix(22,11,t):22;
-  if(moving){fc.save();fc.strokeStyle="#fff6ac";fc.lineWidth=7*(1-t)+2;fc.lineCap="round";fc.globalAlpha=.75;fc.beginPath();fc.moveTo(mix(410,shot.x,Math.max(0,t-.13)),mix(438,shot.y,Math.max(0,t-.13))-Math.sin(Math.PI*Math.max(0,t-.13))*90);fc.lineTo(ballX,ballY);fc.stroke();fc.restore();}
-  drawBall(fc,ballX,ballY,radius,t*12,skin);
+  drawShotActors(fc,travel,spot,moving?{x:freeShot.x,y:freeShot.y}:spot,
+    410,moving?freeShot.keeperX:410,moving?freeShot.y:241,
+    moving?(freeShot.keeperX<410?-1.05:1.05):0,
+    freePower,balls.get(profile.selected)||balls.get("classic"),performance.now()/1000);
   if(!moving){
-    fc.strokeStyle="#ffed68";fc.lineWidth=3;fc.beginPath();fc.arc(freeAim.x,freeAim.y,13,0,Math.PI*2);fc.stroke();
-    fc.beginPath();fc.moveTo(freeAim.x-18,freeAim.y);fc.lineTo(freeAim.x+18,freeAim.y);fc.moveTo(freeAim.x,freeAim.y-18);fc.lineTo(freeAim.x,freeAim.y+18);fc.stroke();
+    fc.strokeStyle="#e2ff69";fc.lineWidth=2;
+    fc.beginPath();fc.arc(freeAim.x,freeAim.y,12);fc.stroke();
+    polygon(fc,[[freeAim.x-6,freeAim.y],[freeAim.x+6,freeAim.y]],null,"#f7ffaf");
+    polygon(fc,[[freeAim.x,freeAim.y-6],[freeAim.x,freeAim.y+6]],null,"#f7ffaf");
   }
 }
+
 function freeStatus(message){
  get("freeScore").textContent="Gol: "+freeGoals+" / "+freeShots+" · Kalan: "+(5-freeShots);
  get("freeStatus").textContent=message;
 }
 function startFree(){
  if(freeAnimation!==null){cancelAnimationFrame(freeAnimation);freeAnimation=null;}
- get("freeScene").classList.remove("free-shooting");
+
  freeShots=0;freeGoals=0;freeBusy=false;freeAim={x:410,y:185};
  get("freeKick").disabled=false;
  freeStatus("Barajın yanından veya üzerinden nişan al.");
@@ -933,25 +937,14 @@ get("freeKick").addEventListener("click",()=>{
  const scored=goalIn&&!wallBlocked&&!saved;
  const shot={x,y,keeperX};
  const start=performance.now();
- const scene=get("freeScene");
- const ballOverlay=get("freeBallOverlay"),keeperOverlay=get("freeKeeperOverlay");
- scene.classList.remove("free-shooting");
- ballOverlay.style.setProperty("--free-target-x",((x-410)/820*100)+"%");
- ballOverlay.style.setProperty("--free-half-x",((x-410)/820*50)+"%");
- ballOverlay.style.setProperty("--free-half-y",((y-438)/510*50)+"%");
- ballOverlay.style.setProperty("--free-target-y",((y-438)/510*100)+"%");
- keeperOverlay.style.setProperty("--free-keeper-x",((keeperX-410)/820*100)+"%");
- void scene.offsetWidth;
- scene.classList.add("free-shooting");
  freeStatus("⚽ Top kaleye gidiyor...");
  function animate(now){
    if(!freeDialog.open){freeAnimation=null;return;}
-   const progress=Math.min(1,(now-start)/1650);
+   const progress=Math.min(1,(now-start)/1150);
    get("freeStatus").textContent="⚽ Şut hareket ediyor · %"+Math.round(progress*100);
    drawFree(progress,shot);
    if(progress<1){freeAnimation=requestAnimationFrame(animate);return;}
    freeAnimation=null;
-   scene.classList.remove("free-shooting");
    freeShots++;if(scored)freeGoals++;
    freeStatus(wallBlocked?"🧱 Top baraja çarptı!":scored?"⚽ GOL!":saved?"🧤 Kaleci kurtardı!":"Şut dışarı gitti!");
    if(freeShots===5){
