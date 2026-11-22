@@ -944,6 +944,7 @@ function freeStatus(message){
 function startFree(){
  if(freeAnimation!==null){cancelAnimationFrame(freeAnimation);freeAnimation=null;}
  freeShots=0;freeGoals=0;freeBusy=false;freeAim={x:410,y:185};
+ get("freeOutcome").hidden=true;
  get("freeKick").disabled=false;
  freeStatus("Barajın yanından veya üzerinden nişan al.");
  // Open the dialog before rendering; rendering errors must never prevent opening.
@@ -963,6 +964,7 @@ freeCanvas.addEventListener("pointerdown",e=>{
 get("freeKick").addEventListener("click",()=>{
  if(freeBusy||freeShots>=5)return;
  freeBusy=true;get("freeKick").disabled=true;
+ get("freeOutcome").hidden=true;
  const x=freeAim.x+(Math.random()-.5)*(105-freePower)*1.3;
  const y=freeAim.y+(Math.random()-.5)*(105-freePower)*.9;
  const wallBlocked=y>225&&x>322&&x<488;
@@ -986,9 +988,12 @@ get("freeKick").addEventListener("click",()=>{
    freeAnimation=null;
    freeShots++;if(scored)freeGoals++;
    freeStatus(wallBlocked?"🧱 Top baraja çarptı!":scored?"⚽ GOL!":saved?"🧤 Kaleci kurtardı!":"Şut dışarı gitti!");
+   const outcome=get("freeOutcome");
+   outcome.textContent=wallBlocked?"🧱 BARAJ!":scored?"⚽ GOOOL!":saved?"🧤 KURTARIŞ!":"❌ DIŞARI!";
+   outcome.hidden=false;
    if(freeShots===5){
      get("freeStatus").textContent+=" Seri bitti! "+freeGoals+" gol attın.";
-   }else setTimeout(()=>{if(!freeDialog.open)return;freeBusy=false;get("freeKick").disabled=false;drawFree();},850);
+   }else setTimeout(()=>{if(!freeDialog.open)return;freeBusy=false;get("freeKick").disabled=false;get("freeOutcome").hidden=true;drawFree();},1250);
  }
  freeAnimation=requestAnimationFrame(animate);
 });
