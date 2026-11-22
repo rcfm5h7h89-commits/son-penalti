@@ -499,6 +499,7 @@ function startMatch() {
     status:"Kaleye dokunarak nişan al veya topu yukarı kaydırarak şut çek."};
   if(!matchDialog.open)matchDialog.showModal();
   renderMatch();
+  commentary(tournament?"Turnuvada "+tournamentStages[tournament.stage]+" başlıyor!":"Maç başlıyor! Üç penaltılık heyecan dolu mücadele!");
 }
 function finishMatch() {
   const s=matchState;
@@ -530,6 +531,7 @@ function finishMatch() {
     }
   } else if(reward)updateProfile(current=>({...current,gold:current.gold+reward}));
   renderMatch();
+  commentary(tournamentOutcome==="champion"?"Şampiyon! Kupayı kazandın!":tournamentOutcome==="advanced"?"Harika! Bir üst tura çıktın!":tournamentOutcome==="eliminated"?"Turnuvaya veda ediyoruz!":tournamentOutcome==="draw"?"Beraberlik! Tur tekrar oynanacak!":s.playerGoals>s.robotGoals?"Maçı kazandın!":s.playerGoals===s.robotGoals?"Maç berabere bitti!":"Maçı robot kazandı!");
 }
 function aimMatch(x,y) {
   if(!matchState||matchState.phase!=="player")return;
@@ -552,6 +554,7 @@ function fireMatch() {
     s.phase="playerResult";
     s.status=scored?"GOL! Şimdi kaleye geç.":shot.outcome==="save"?"Kaleci kurtardı!":"Şut dışarı gitti!";
     renderMatch();
+    commentary(scored?"Gol!":shot.outcome==="save"?"Kaleciden müthiş kurtarış!":"Top dışarı çıktı!");
     matchLater(()=>{
       s.phase="defend";s.keeperZone="Orta";
       s.status=s.robotName+" şut çekecek! Kurtarmak için Sol, Orta veya Sağ seç.";
@@ -577,6 +580,7 @@ function defendMatch(direction) {
     s.phase="robotResult";
     s.status=scored?"Robot gol attı!":saved?"Kurtardın!":"Robotun şutu dışarı gitti!";
     renderMatch();
+    commentary(scored?"Robot gol attı!":saved?"Harika kurtarış!":"Robotun şutu dışarı gitti!");
     matchLater(()=>{
       s.round++;
       if(s.round===3){finishMatch();return;}
