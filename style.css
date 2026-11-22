@@ -253,3 +253,5 @@ button{cursor:pointer;font:inherit;min-height:42px;color:var(--text);background:
 .free-scene.free-shooting .free-keeper-overlay{display:block;animation:free-keeper-dive 1.65s ease-in-out both}
 @keyframes free-ball-flight{0%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(calc(-50% + var(--free-half-x)),calc(-50% + var(--free-half-y) - 18px)) scale(.75)}100%{transform:translate(calc(-50% + var(--free-target-x)),calc(-50% + var(--free-target-y))) scale(.4)}}
 @keyframes free-keeper-dive{0%,25%{transform:translate(-50%,-50%) rotate(0deg)}100%{transform:translate(calc(-50% + var(--free-keeper-x)),-25%) rotate(65deg)}}
+
+#freeDialog #freeField{display:block!important;flex:0 0 auto!important;width:100%!important;height:auto!important;min-height:160px!important;aspect-ratio:820/510!important;visibility:visible!important}
