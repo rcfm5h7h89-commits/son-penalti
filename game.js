@@ -1248,8 +1248,10 @@ cornerKick.addEventListener("click",()=>{
 function finishCorner(scored,message){
  cornerShots++;if(scored)cornerGoals++;
  const endOfSeries=cornerShots>=5;
- cornerStatus(message+(endOfSeries?" Seri tamamlandı!":""));
- get("cornerOutcome").textContent=cornerAction?.label||message;
+ const cornerReward=endOfSeries&&cornerGoals>=4?20:0;
+ if(cornerReward)updateProfile(current=>({...current,gold:current.gold+cornerReward}));
+ cornerStatus(message+(endOfSeries?(cornerReward?" Seri tamamlandı! +20 altın kazandın!":" Seri tamamlandı!"):""));
+ get("cornerOutcome").textContent=cornerReward?"🏆 4+ gol! +20 ALTIN":(cornerAction?.label||message);
  get("cornerOutcome").hidden=false;
  cornerPhase=endOfSeries?"done":"result";cornerButtons();drawCorner();
  const currentShots=cornerShots;
