@@ -936,6 +936,7 @@ get("freeKick").addEventListener("click",()=>{
  function animate(now){
    if(!freeDialog.open){freeAnimation=null;return;}
    const progress=Math.min(1,(now-start)/1650);
+   get("freeStatus").textContent="⚽ Şut hareket ediyor · %"+Math.round(progress*100);
    drawFree(progress,shot);
    if(progress<1){freeAnimation=requestAnimationFrame(animate);return;}
    freeAnimation=null;
