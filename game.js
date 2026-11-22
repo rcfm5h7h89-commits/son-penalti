@@ -1078,10 +1078,7 @@ function commentary(message){
  if(!commentaryOn||!("speechSynthesis" in window))return;
  try{
   speechSynthesis.cancel();
-  // Turkish TTS engines sometimes pronounce "gol" as "gul".
-  // Spell it phonetically for the spoken audio only; on-screen text stays unchanged.
-  const spoken=message.replace(/gol/gi,match=>match===match.toUpperCase()?"GOOL":"gool");
-  const speech=new SpeechSynthesisUtterance(spoken);
+  const speech=new SpeechSynthesisUtterance(message);
   speech.lang="tr-TR";
   speech.voice=chooseCommentatorVoice();
   // Slightly slower, lower-pitched delivery than the old high-pitched voice.
