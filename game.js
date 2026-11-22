@@ -549,6 +549,8 @@ function fireMatch() {
   const matchPower=Number(powerInput.value);
   const shot=makeShot(s.aim,matchPower,410,s.round,Math.random());
   const scored=shot.outcome==="goal";
+  // Start speech from the actual tap/click: mobile browsers may block delayed speech.
+  commentary(scored?"Gol!":shot.outcome==="save"?"Kaleciden müthiş kurtarış!":"Top dışarı çıktı!");
   const direction=s.aim.x<350?"Sol":s.aim.x>470?"Sağ":"Orta";
   s.phase="playerFlight";s.status="Top kaleye gidiyor…";
   renderMatch();
@@ -559,7 +561,6 @@ function fireMatch() {
     s.phase="playerResult";
     s.status=scored?"GOL! Şimdi kaleye geç.":shot.outcome==="save"?"Kaleci kurtardı!":"Şut dışarı gitti!";
     renderMatch();
-    commentary(scored?"Gol!":shot.outcome==="save"?"Kaleciden müthiş kurtarış!":"Top dışarı çıktı!");
     matchLater(()=>{
       s.phase="defend";s.keeperZone="Orta";
       s.status=s.robotName+" şut çekecek! Kurtarmak için Sol, Orta veya Sağ seç.";
@@ -575,6 +576,7 @@ function defendMatch(direction) {
   const onTarget=Math.random()<0.88;
   const saved=direction===s.robotShotZone&&Math.random()<0.88;
   const scored=onTarget&&!saved;
+  commentary(scored?"Gol! Robot gol attı!":saved?"Harika kurtarış!":"Robotun şutu dışarı gitti!");
   const end={x:zoneX[s.robotShotZone],y:onTarget?190:goal.top-30};
   s.phase="robotFlight";s.status=s.robotName+" şut çekiyor…";
   renderMatch();
@@ -585,7 +587,6 @@ function defendMatch(direction) {
     s.phase="robotResult";
     s.status=scored?"Robot gol attı!":saved?"Kurtardın!":"Robotun şutu dışarı gitti!";
     renderMatch();
-    commentary(scored?"Robot gol attı!":saved?"Harika kurtarış!":"Robotun şutu dışarı gitti!");
     matchLater(()=>{
       s.round++;
       if(s.round===3){finishMatch();return;}
