@@ -1269,10 +1269,11 @@ function chooseCommentatorVoice(){
  if(!("speechSynthesis" in window))return null;
  const voices=speechSynthesis.getVoices();
  const turkish=voices.filter(v=>/^tr([-_]|$)/i.test(v.lang));
- const maleHints=/\b(male|erkek|cem|tolga|murat|ahmet|mehmet|emre|kerem|yusuf|ali|kaan)\b/i;
- const femaleHints=/\b(female|kadın|kadin|aylin|filiz|zeynep|elif|esra)\b/i;
+ // Web Speech has no standard gender field; prioritize explicitly male-named Turkish voices.
+ const maleHints=/(?:^|[^a-zğüşıöç])(male|erkek|cem|tolga|murat|ahmet|mehmet|emre|kerem|yusuf|ali|kaan|barış|baris|onur|hakan|serkan|fatih|osman|can|deniz)(?:$|[^a-zğüşıöç])/i;
+ const femaleHints=/(?:^|[^a-zğüşıöç])(female|kadın|kadin|aylin|filiz|zeynep|elif|esra|selin|ayşe|ayse|eda|seda|sibel|melis|gül|gul|dilara)(?:$|[^a-zğüşıöç])/i;
  const preferred=turkish.find(v=>maleHints.test(v.name)&&!femaleHints.test(v.name))
-  ||turkish.find(v=>!femaleHints.test(v.name)&&(/natural|neural|premium|enhanced/i.test(v.name)))
+  ||voices.find(v=>maleHints.test(v.name)&&/^tr/i.test(v.lang))
   ||turkish.find(v=>!femaleHints.test(v.name))
   ||turkish[0]||null;
  commentatorVoice=preferred;
@@ -1295,7 +1296,7 @@ function commentary(message){
   speech.lang="tr-TR";
   speech.voice=chooseCommentatorVoice();
   // Slightly slower, lower-pitched delivery than the old high-pitched voice.
-  speech.rate=isGoalShout?.90:.94;speech.pitch=isGoalShout?.9:.82;speech.volume=1;
+  speech.rate=isGoalShout?.88:.93;speech.pitch=isGoalShout?.72:.68;speech.volume=1;
   speech.onerror=event=>console.warn("Spiker seslendirme hatası:",event.error);
   speechSynthesis.speak(speech);
  }catch(error){console.warn("Spiker:",error);}
