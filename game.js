@@ -909,11 +909,12 @@ function freeStatus(message){
 }
 function startFree(){
  if(freeAnimation!==null){cancelAnimationFrame(freeAnimation);freeAnimation=null;}
-
  freeShots=0;freeGoals=0;freeBusy=false;freeAim={x:410,y:185};
  get("freeKick").disabled=false;
  freeStatus("Barajın yanından veya üzerinden nişan al.");
- drawFree();freeDialog.showModal();
+ // Open the dialog before rendering; rendering errors must never prevent opening.
+ if(!freeDialog.open)freeDialog.showModal();
+ try{drawFree();}catch(error){console.error("Frikik çizimi:",error);get("freeStatus").textContent="Frikik açıldı. Şut çekmeyi deneyebilirsin.";}
 }
 get("openFree").addEventListener("click",startFree);
 get("freePower").addEventListener("input",e=>{freePower=Number(e.target.value);get("freePowerText").textContent="%"+freePower;});
