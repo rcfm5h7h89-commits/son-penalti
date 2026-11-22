@@ -779,15 +779,15 @@ function makeShot(aim,power,keeper,round,random,keeperBoost=false) {
   if(power<33) ends.y+=90-(power-20)*5;
   if(power>93) ends.y-=(power-93)*3.6;
   const inside=ends.x>=goal.left+8&&ends.x<=goal.right-8&&ends.y>=goal.top+8&&ends.y<=goal.bottom-6;
-  const reads=random<(keeperBoost?.50:.44)+round*.055;
-  const reach=(keeperBoost?164:156)-power*.72+round*4;
+  const reads=random<(keeperBoost?.45:.39)+round*.05;
+  const reach=(keeperBoost?153:145)-power*.72+round*4;
   const lateral=ends.x-keeper;
   const guess=random<.78?-reach:reach;
   const stride=reads?clamp(lateral,-reach,reach):guess;
   const dive=clamp(keeper+stride,goal.left+25,goal.right-25);
   const lean=clamp((dive-keeper)/92,-1,1);
   const height=clamp(ends.y,163,239);
-  const saved=inside&&Math.abs(ends.x-dive)<(keeperBoost?48:44)&&Math.abs(ends.y-height)<33;
+  const saved=inside&&Math.abs(ends.x-dive)<(keeperBoost?43:39)&&Math.abs(ends.y-height)<33;
   const postHit=ends.y>=goal.top-11&&ends.y<=goal.bottom+8&&
     (Math.abs(ends.x-goal.left)<12||Math.abs(ends.x-goal.right)<12||Math.abs(ends.y-goal.top)<10);
   const outcome=postHit?"post":inside?saved?"save":"goal":"miss";
