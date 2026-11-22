@@ -804,7 +804,7 @@ function primaryAction() {
 }
 
 kick.addEventListener("click",primaryAction);
-get("reset").addEventListener("click",()=>{reset();kick.focus();});
+// Yeni seri header button removed; game can still restart through its normal flow.
 arrows.forEach(button=>button.addEventListener("click",()=>{
   if(state==="ready") target(aim.x+Number(button.dataset.x)*26,aim.y+Number(button.dataset.y)*19);
 }));
