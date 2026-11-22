@@ -80,6 +80,20 @@ function buildStadium() {
       g.fillStyle="#edfbe0";g.fillRect(x-30+i*8,39,5,5);g.fillRect(x-30+i*8,48,5,5);
     }
   }
+  // Broadcast floodlight beams and layered atmospheric depth, cached on the stadium canvas.
+  g.save();
+  for(const x of [80,740]){
+    const beam=g.createLinearGradient(x,42,410,345);
+    beam.addColorStop(0,"#f2ffe330");beam.addColorStop(.45,"#d9ffe50d");beam.addColorStop(1,"#d9ffe500");
+    g.fillStyle=beam;
+    g.beginPath();g.moveTo(x-32,60);g.lineTo(x+32,60);
+    g.lineTo(x===80?490:330,410);g.lineTo(x===80?-50:870,410);
+    g.closePath();g.fill();
+  }
+  const atmosphere=g.createLinearGradient(0,85,0,245);
+  atmosphere.addColorStop(0,"#ffffff00");atmosphere.addColorStop(.62,"#d9fff40a");atmosphere.addColorStop(1,"#b7e8d81d");
+  g.fillStyle=atmosphere;g.fillRect(0,85,W,160);
+  g.restore();
   polygon(g,[[0,99],[146,123],[302,136],[500,136],[682,121],[820,97],[820,239],[0,239]],activeStadium.stand,"#50706a",3);
   polygon(g,[[0,141],[167,152],[330,158],[490,158],[665,153],[820,138],[820,219],[0,219]],activeStadium.crowd);
   let seed=150;
@@ -111,6 +125,26 @@ function buildStadium() {
     polygon(g,[[x,226],[x+86,226],[x+80,241],[x,241]],x%2?"#314e46":"#394f38");
     polygon(g,[[x+9,233],[x+71,233]],null,"#c0d68066",2);
   }
+  // Advertising-board illumination, small spectator flags and layered seats.
+  g.save();
+  for(let i=0;i<14;i++){
+    const x=i*64-6,y=225+Math.sin(i*.48)*2;
+    const panel=g.createLinearGradient(x,y,x,y+18);
+    panel.addColorStop(0,i%3===0?"#2a857b":"#1a504b");
+    panel.addColorStop(1,"#071f24");
+    g.fillStyle=panel;g.fillRect(x,y,62,18);
+    g.fillStyle=i%3===0?"#d8ff81":"#a9f3df";
+    g.globalAlpha=.85;g.fillRect(x+7,y+6,42,2);
+  }
+  g.globalAlpha=1;
+  for(let i=0;i<20;i++){
+    const x=22+i*41,y=172+Math.sin(i*.9)*7;
+    g.strokeStyle="#e6ffec55";g.lineWidth=1.2;
+    g.beginPath();g.moveTo(x,y);g.lineTo(x,y-9);g.stroke();
+    g.fillStyle=i%3===0?"#f4edaa":i%3===1?"#c5e6d6":"#91bdac";
+    g.beginPath();g.moveTo(x,y-9);g.lineTo(x+8,y-6);g.lineTo(x,y-3);g.closePath();g.fill();
+  }
+  g.restore();
   const turf=g.createLinearGradient(0,233,0,510);
   turf.addColorStop(0,activeStadium.turf);turf.addColorStop(1,activeStadium.turfEnd);
   g.fillStyle=turf;g.fillRect(0,246,W,H-246);
@@ -133,6 +167,15 @@ function buildStadium() {
   polygon(g,[[5,283],[815,283]],null,"#e6f4e799",2);
   polygon(g,[[180,284],[116,363],[704,363],[640,284]],null,"#d6f0dbaa",2);
   polygon(g,[[92,284],[-4,476],[824,476],[728,284]],null,"#d6f0dbaa",2.2);
+  // Foreground blades and pitch texture, generated only when the stadium changes.
+  g.save();
+  for(let i=0;i<260;i++){
+    const x=rand()*W,y=315+rand()*195;
+    g.strokeStyle=i%3===0?"#b6e89d30":"#173d293a";
+    g.lineWidth=.7+rand()*.7;
+    g.beginPath();g.moveTo(x,y);g.lineTo(x+rand()*3-1.5,y-2-rand()*4);g.stroke();
+  }
+  g.restore();
   ellipse(g,spot.x,spot.y+3,5,2.5,"#c4dbc4");
   ellipse(g,410,288,210,15,"#112e2480");
   drawNet(g);
@@ -187,6 +230,14 @@ function drawKeeper(x,y,lean,t,ctx=c) {
     ctx.beginPath();ctx.moveTo(-3,-3);ctx.lineTo(3,3);ctx.moveTo(3,-3);ctx.lineTo(-3,3);ctx.stroke();
     ctx.restore();
   }
+  // Highlights on gloves, shin guards and kit give the 2D keeper more depth.
+  ctx.save();
+  ctx.globalAlpha=.32;
+  polygon(ctx,[[-15,11],[-13,23],[-16,29]],"#c8d9e4");
+  polygon(ctx,[[12,10],[15,23],[17,29]],"#c8d9e4");
+  ellipse(ctx,-29,-17,2,2,"#ffffff");
+  ellipse(ctx,30,-18,2,2,"#ffffff");
+  ctx.restore();
   ellipse(ctx,0,-28,9,10,"#b56e4f");
   polygon(ctx,[[-9,-30],[-7,-36],[2,-39],[9,-32]],"#3c2e28");
   ctx.restore();
@@ -461,23 +512,7 @@ function matchLater(callback,delay=850) {
   matchTimer=setTimeout(()=>{matchTimer=null;if(matchDialog.open) callback();},delay);
 }
 function drawMatchKeeper(x,y,lean,t) {
-  const shirt=shirts.get(profile.selectedShirt)??defaultShirt;
-  ellipse(mc,x,goal.bottom-4,30,5,"#142e23a0");
-  mc.save();mc.translate(x,y);mc.rotate(lean);
-  const stride=Math.sin(t*10)*3*(1-Math.min(1,Math.abs(lean)));
-  mc.lineCap="round";
-  polygon(mc,[[-9,9],[-13+stride,25],[-20+stride,38]],null,"#223343",9);
-  polygon(mc,[[8,9],[14-stride,24],[19-stride,38]],null,"#223343",9);
-  polygon(mc,[[-20+stride,38],[-26+stride,39]],null,"#ebf3dd",5);
-  polygon(mc,[[19-stride,38],[25-stride,38]],null,"#ebf3dd",5);
-  polygon(mc,[[-13,-17],[-24,-8],[-28,-14]],null,shirt.sleeves,8);
-  polygon(mc,[[13,-17],[24,-8],[29,-15]],null,shirt.sleeves,8);
-  ellipse(mc,-29,-14,5,6,"#f5eee3");ellipse(mc,30,-15,5,6,"#f5eee3");
-  polygon(mc,[[-13,-20],[13,-20],[11,6],[-11,6]],shirt.body,"#243a34",1.5);
-  polygon(mc,[[-4,-17],[-1,3],[4,3],[2,-17]],shirt.stripe);
-  ellipse(mc,0,-28,9,10,"#b56e4f");
-  polygon(mc,[[-9,-30],[-7,-36],[2,-39],[9,-32]],"#3c2e28");
-  mc.restore();
+  drawKeeper(x,y,lean,t,mc);
 }
 
 function renderMatchField() {
