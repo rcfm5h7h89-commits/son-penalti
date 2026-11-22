@@ -91,6 +91,21 @@ function buildStadium() {
     ellipse(g,x,y,size,size*.63,palette[Math.floor(rand()*palette.length)]);
   }
   for(const y of [160,191,219]) polygon(g,[[0,y-14],[410,y],[W,y-14]],null,"#294744",3);
+  // Stadium atmosphere: upper-tier seating, illuminated ribbon boards and depth haze.
+  const haze=g.createLinearGradient(0,95,0,250);
+  haze.addColorStop(0,"#ffffff00");haze.addColorStop(.75,"#b7e3d012");haze.addColorStop(1,"#e0fff00c");
+  g.fillStyle=haze;g.fillRect(0,95,W,155);
+  for(let tier=0;tier<3;tier++){
+    const y=111+tier*25;
+    g.beginPath();g.moveTo(0,y-8);g.quadraticCurveTo(W/2,y+22,W,y-8);
+    g.strokeStyle=tier===2?"#bce9d099":"#e1f3df45";g.lineWidth=tier===2?3:1.5;g.stroke();
+  }
+  for(let x=8;x<W;x+=32){
+    const y=208+Math.sin(x/W*Math.PI)*9;
+    g.fillStyle=(Math.floor(x/32)%4===0)?"#d9ff94":"#8fe6cd";
+    g.globalAlpha=.45;g.fillRect(x,y,19,2);
+  }
+  g.globalAlpha=1;
   g.fillStyle="#18423b";g.fillRect(0,221,W,26);
   for(let x=13;x<W;x+=105) {
     polygon(g,[[x,226],[x+86,226],[x+80,241],[x,241]],x%2?"#314e46":"#394f38");
@@ -99,6 +114,17 @@ function buildStadium() {
   const turf=g.createLinearGradient(0,233,0,510);
   turf.addColorStop(0,activeStadium.turf);turf.addColorStop(1,activeStadium.turfEnd);
   g.fillStyle=turf;g.fillRect(0,246,W,H-246);
+  // Subtle broadcast-style pitch mowing stripes and foreground vignette.
+  g.save();
+  for(let i=0;i<8;i++){
+    const top=248+i*35,bottom=top+35;
+    g.fillStyle=i%2?"#d8ffca08":"#071f140c";
+    g.fillRect(0,top,W,35);
+  }
+  const pitchLight=g.createRadialGradient(410,305,70,410,355,520);
+  pitchLight.addColorStop(0,"#ffffff00");pitchLight.addColorStop(1,"#00180f55");
+  g.fillStyle=pitchLight;g.fillRect(0,246,W,H-246);
+  g.restore();
   for(let i=-5;i<5;i+=2) polygon(g,[[410+i*72,245],[410+(i+1)*72,245],[410+(i+1)*154,H],[410+i*154,H]],"#7ed06419");
   for(let i=0;i<650;i++) {
     const x=rand()*W,y=250+rand()*260;
@@ -147,6 +173,20 @@ function drawKeeper(x,y,lean,t,ctx=c) {
   ellipse(ctx,-29,-14,5,6,"#f5eee3");ellipse(ctx,30,-15,5,6,"#f5eee3");
   polygon(ctx,[[-13,-20],[13,-20],[11,6],[-11,6]],shirt.body,"#243a34",1.5);
   polygon(ctx,[[-4,-17],[-1,3],[4,3],[2,-17]],shirt.stripe);
+  // Jersey fabric sheen, seams and goalkeeper glove detail.
+  ctx.save();
+  ctx.globalAlpha=.23;
+  polygon(ctx,[[-10,-18],[-4,-16],[-3,2],[-10,3]],"#ffffff");
+  polygon(ctx,[[6,-17],[10,-16],[9,2],[6,3]],"#ffffff");
+  ctx.restore();
+  ctx.strokeStyle="#f4f8e3aa";ctx.lineWidth=1.3;
+  ctx.beginPath();ctx.moveTo(-9,-18);ctx.lineTo(-9,-10);ctx.moveTo(9,-18);ctx.lineTo(9,-10);ctx.stroke();
+  for(const gx of [-29,30]){
+    ctx.save();ctx.translate(gx,-15);
+    ctx.strokeStyle="#2d4b47";ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(-3,-3);ctx.lineTo(3,3);ctx.moveTo(3,-3);ctx.lineTo(-3,3);ctx.stroke();
+    ctx.restore();
+  }
   ellipse(ctx,0,-28,9,10,"#b56e4f");
   polygon(ctx,[[-9,-30],[-7,-36],[2,-39],[9,-32]],"#3c2e28");
   ctx.restore();
@@ -214,6 +254,12 @@ function drawBall(ctx,x,y,r,spin,skin) {
   ellipse(ctx,0,0,r,r,color);
   if(skin.pattern) {
     drawBallPattern(ctx,r,skin);
+  // Specular shine and thin rim give every shop ball a rounder 3D look.
+  const specular=ctx.createRadialGradient(-r*.42,-r*.52,0,-r*.32,-r*.4,r*.78);
+  specular.addColorStop(0,"#ffffff88");specular.addColorStop(.42,"#ffffff1b");specular.addColorStop(1,"#ffffff00");
+  ellipse(ctx,0,0,r*.96,r*.96,specular);
+  ctx.strokeStyle="#ffffff45";ctx.lineWidth=Math.max(.6,r*.055);
+  ctx.beginPath();ctx.arc(0,0,r*.91,Math.PI*1.08,Math.PI*1.78);ctx.stroke();
     ctx.restore();
     return;
   }
@@ -225,6 +271,12 @@ function drawBall(ctx,x,y,r,spin,skin) {
     });
     polygon(ctx,points,skin.patch);
   });
+  // Specular shine and thin rim give every shop ball a rounder 3D look.
+  const specular=ctx.createRadialGradient(-r*.42,-r*.52,0,-r*.32,-r*.4,r*.78);
+  specular.addColorStop(0,"#ffffff88");specular.addColorStop(.42,"#ffffff1b");specular.addColorStop(1,"#ffffff00");
+  ellipse(ctx,0,0,r*.96,r*.96,specular);
+  ctx.strokeStyle="#ffffff45";ctx.lineWidth=Math.max(.6,r*.055);
+  ctx.beginPath();ctx.arc(0,0,r*.91,Math.PI*1.08,Math.PI*1.78);ctx.stroke();
   ctx.restore();
 }
 
