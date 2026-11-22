@@ -966,8 +966,9 @@ get("freeKick").addEventListener("click",()=>{
  const x=freeAim.x+(Math.random()-.5)*(105-freePower)*1.3;
  const y=freeAim.y+(Math.random()-.5)*(105-freePower)*.9;
  const wallBlocked=y>225&&x>322&&x<488;
- const keeperX=300+Math.random()*220;
- const saved=Math.abs(x-keeperX)<42&&y>150&&y<270;
+ // Frikik kalecisi: slightly better at reading the shot, but still beatable.
+ const keeperX=Math.random()<.62?clamp(x+(Math.random()-.5)*130,goal.left+25,goal.right-25):300+Math.random()*220;
+ const saved=Math.abs(x-keeperX)<49&&y>150&&y<270;
  const goalIn=x>goal.left+12&&x<goal.right-12&&y>goal.top+10&&y<goal.bottom-10;
  const scored=goalIn&&!wallBlocked&&!saved;
  const shot={x,y,keeperX,wallBlocked,bounceDirection:Math.random()<.5?-1:1};
