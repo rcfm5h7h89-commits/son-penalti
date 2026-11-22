@@ -217,3 +217,10 @@ button{cursor:pointer;font:inherit;min-height:42px;color:var(--text);background:
   .panel .submit{grid-column:1 / -1!important;grid-row:5!important;min-height:52px;align-self:stretch}
   .panel .hint{grid-column:1 / -1!important;grid-row:6!important}
 }
+
+/* Free-kick modal and fifth header action */
+#freeDialog #freeField{display:block;width:100%;height:auto;aspect-ratio:820/510;background:#153a31;border-radius:10px;touch-action:none}
+#freeDialog .free-power{display:flex;justify-content:space-between;margin-top:12px}
+#freeDialog #freePower{display:block;width:100%;margin:8px 0 14px}
+#freeDialog #freeRestart{margin-top:10px;width:100%}
+@media(max-width:740px){.mast-actions{grid-template-columns:repeat(5,minmax(0,1fr))!important}.mast-actions button{font-size:clamp(9px,2.2vw,12px)!important;padding:3px 1px!important}}
