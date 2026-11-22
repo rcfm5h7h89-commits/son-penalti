@@ -871,24 +871,39 @@ requestAnimationFrame(frame);
 // Free-kick mode: independent five-shot challenge with a defensive wall.
 const freeDialog=get("freeDialog"),freeCanvas=get("freeField"),fc=freeCanvas.getContext("2d");
 let freeShots=0,freeGoals=0,freeAim={x:410,y:185},freePower=68,freeBusy=false;
-function drawFree(){
+let freeAnimation=null;
+function drawFree(progress=null,shot=null){
+  fc.clearRect(0,0,820,510);
   fc.drawImage(background,0,0);
+  const moving=progress!==null&&shot;
+  const t=moving?smooth(Math.min(1,progress)):0;
+  const ballX=moving?mix(410,shot.x,t):410;
+  const ballY=moving?mix(438,shot.y,t)-Math.sin(Math.PI*t)*Math.max(12,35*(1-t)):438;
   const wall=[335,370,405,440,475];
   for(const x of wall){
-    fc.fillStyle="#1a2635";fc.fillRect(x-12,295,24,52);
-    fc.fillStyle="#e9c5a0";fc.beginPath();fc.arc(x,286,11,0,Math.PI*2);fc.fill();
-    fc.fillStyle="#19222b";fc.fillRect(x-10,344,8,28);fc.fillRect(x+2,344,8,28);
+    const jump=moving&&t>.23&&t<.67?Math.sin((t-.23)/.44*Math.PI)*15:0;
+    fc.fillStyle="#1a2635";fc.fillRect(x-12,295-jump,24,52);
+    fc.fillStyle="#e9c5a0";fc.beginPath();fc.arc(x,286-jump,11,0,Math.PI*2);fc.fill();
+    fc.fillStyle="#19222b";fc.fillRect(x-10,344-jump,8,28);fc.fillRect(x+2,344-jump,8,28);
   }
-  drawKeeper(410,241,0,performance.now()/1000,fc);
-  drawBall(fc,410,438,19,0,balls.get(profile.selected)||balls.get("classic"));
-  fc.strokeStyle="#ffed68";fc.lineWidth=3;fc.beginPath();fc.arc(freeAim.x,freeAim.y,13,0,Math.PI*2);fc.stroke();
-  fc.beginPath();fc.moveTo(freeAim.x-18,freeAim.y);fc.lineTo(freeAim.x+18,freeAim.y);fc.moveTo(freeAim.x,freeAim.y-18);fc.lineTo(freeAim.x,freeAim.y+18);fc.stroke();
+  const dive=moving?smooth(Math.max(0,Math.min(1,(t-.36)/.5))):0;
+  const keeperX=moving?mix(410,shot.keeperX,dive):410;
+  const lean=moving?(shot.keeperX<410?-0.7:0.7)*dive:0;
+  drawKeeper(keeperX,241+12*dive,lean,performance.now()/1000,fc);
+  const skin=balls.get(profile.selected)||balls.get("classic");
+  const radius=moving?mix(19,9,t):19;
+  drawBall(fc,ballX,ballY,radius,t*12,skin);
+  if(!moving){
+    fc.strokeStyle="#ffed68";fc.lineWidth=3;fc.beginPath();fc.arc(freeAim.x,freeAim.y,13,0,Math.PI*2);fc.stroke();
+    fc.beginPath();fc.moveTo(freeAim.x-18,freeAim.y);fc.lineTo(freeAim.x+18,freeAim.y);fc.moveTo(freeAim.x,freeAim.y-18);fc.lineTo(freeAim.x,freeAim.y+18);fc.stroke();
+  }
 }
 function freeStatus(message){
  get("freeScore").textContent="Gol: "+freeGoals+" / "+freeShots+" · Kalan: "+(5-freeShots);
  get("freeStatus").textContent=message;
 }
 function startFree(){
+ if(freeAnimation!==null){cancelAnimationFrame(freeAnimation);freeAnimation=null;}
  freeShots=0;freeGoals=0;freeBusy=false;freeAim={x:410,y:185};
  get("freeKick").disabled=false;
  freeStatus("Barajın yanından veya üzerinden nişan al.");
@@ -914,11 +929,21 @@ get("freeKick").addEventListener("click",()=>{
  const saved=Math.abs(x-keeperX)<42&&y>150&&y<270;
  const goalIn=x>goal.left+12&&x<goal.right-12&&y>goal.top+10&&y<goal.bottom-10;
  const scored=goalIn&&!wallBlocked&&!saved;
- freeShots++;if(scored)freeGoals++;
- freeStatus(wallBlocked?"🧱 Top baraja çarptı!":scored?"⚽ GOL!":saved?"🧤 Kaleci kurtardı!":"Şut dışarı gitti!");
- fc.strokeStyle=scored?"#a5ff6c":"#ffac6c";fc.lineWidth=5;fc.beginPath();fc.arc(x,y,19,0,Math.PI*2);fc.stroke();
- if(freeShots===5){
-   get("freeStatus").textContent+=" Seri bitti! "+freeGoals+" gol attın.";
- }else setTimeout(()=>{if(!freeDialog.open)return;freeBusy=false;get("freeKick").disabled=false;drawFree();},750);
+ const shot={x,y,keeperX};
+ const start=performance.now();
+ freeStatus("⚽ Top kaleye gidiyor...");
+ function animate(now){
+   if(!freeDialog.open){freeAnimation=null;return;}
+   const progress=Math.min(1,(now-start)/950);
+   drawFree(progress,shot);
+   if(progress<1){freeAnimation=requestAnimationFrame(animate);return;}
+   freeAnimation=null;
+   freeShots++;if(scored)freeGoals++;
+   freeStatus(wallBlocked?"🧱 Top baraja çarptı!":scored?"⚽ GOL!":saved?"🧤 Kaleci kurtardı!":"Şut dışarı gitti!");
+   if(freeShots===5){
+     get("freeStatus").textContent+=" Seri bitti! "+freeGoals+" gol attın.";
+   }else setTimeout(()=>{if(!freeDialog.open)return;freeBusy=false;get("freeKick").disabled=false;drawFree();},850);
+ }
+ freeAnimation=requestAnimationFrame(animate);
 });
 get("freeRestart").addEventListener("click",()=>{freeDialog.close();startFree();});
