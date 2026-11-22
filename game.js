@@ -1060,16 +1060,59 @@ requestAnimationFrame(frame);
 const freeDialog=get("freeDialog"),freeCanvas=get("freeField"),fc=freeCanvas.getContext("2d");
 let freeShots=0,freeGoals=0,freeAim={x:410,y:185},freePower=68,freeBusy=false;
 let freeAnimation=null;
+function drawFreeWallPlayer(ctx,x,ground,index,jumping=false){
+  ctx.save();
+  ctx.translate(x,ground);
+  ctx.lineCap="round";ctx.lineJoin="round";
+  // Contact shadow, similar to the corner attacker.
+  ctx.save();ctx.globalAlpha=.32;
+  ellipse(ctx,0,26,15,4,"#071c18");ctx.restore();
+  const skin=["#c98a62","#d3a079","#b97b57","#d9ad83","#ba805c"][index%5];
+  const jersey=index%2===0?"#263f74":"#304e87";
+  const shorts="#172c4c";
+  const limb=(points,width,color,edge="#172431")=>{
+    ctx.beginPath();ctx.moveTo(points[0],points[1]);
+    for(let k=2;k<points.length;k+=2)ctx.lineTo(points[k],points[k+1]);
+    ctx.strokeStyle=edge;ctx.lineWidth=width+2.4;ctx.stroke();
+    ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke();
+  };
+  // Boots, socks, knees and individually articulated legs.
+  limb([-7,-1,-8,12,-10,23],7,shorts);
+  limb([7,-1,8,12,10,23],7,shorts);
+  limb([-9,13,-10,22],5,"#edf4ef");
+  limb([9,13,10,22],5,"#edf4ef");
+  limb([-10,22,-15,24],6,"#f0bb33");
+  limb([10,22,15,24],6,"#f0bb33");
+  // Sleeves, hands and defensive arm posture.
+  limb([-10,-36,-15,-25,-9,-17],7,jersey);
+  limb([10,-36,15,-25,9,-17],7,jersey);
+  ellipse(ctx,-9,-17,3.2,4,skin);
+  ellipse(ctx,9,-17,3.2,4,skin);
+  polygon(ctx,[[-11,-39],[11,-39],[10,-9],[-10,-9]],jersey,"#122b43",1.3);
+  polygon(ctx,[[-10,-9],[10,-9],[9,1],[-9,1]],shorts,"#122133",1.1);
+  ctx.save();ctx.globalAlpha=.27;
+  polygon(ctx,[[-8,-37],[-3,-37],[-3,-11],[-8,-11]],"#f4ffff");
+  ctx.restore();
+  ctx.fillStyle="#f3f6f5";ctx.font="bold 11px system-ui";
+  ctx.textAlign="center";ctx.fillText(String(index+2),0,-20);
+  // Neck, head, hair and subtle face highlights.
+  polygon(ctx,[[-3,-42],[3,-42],[3,-37],[-3,-37]],skin);
+  ellipse(ctx,0,-51,9,11,skin);
+  ellipse(ctx,-3,-55,2,2,"#ffffff36");
+  polygon(ctx,[[-9,-53],[-8,-61],[-3,-64],[5,-63],[9,-58],[8,-54],[3,-58],[-5,-57]],index%3===0?"#27211f":"#302b29");
+  ctx.strokeStyle="#553d34";ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(-4,-50);ctx.lineTo(-2,-50);ctx.moveTo(2,-50);ctx.lineTo(4,-50);ctx.stroke();
+  ctx.restore();
+}
 function drawFree(progress=null,freeShot=null){
   fc.clearRect(0,0,W,H);
   fc.drawImage(background,0,0);
   const moving=progress!==null&&freeShot!==null;
   const travel=moving?clamp(progress,0,1):0;
-  for(const x of [335,370,405,440,475]){
+  // Detailed five-player defensive wall, styled like the corner-mode footballer.
+  for(const [i,x] of [335,370,405,440,475].entries()){
     const jump=moving&&travel>.18&&travel<.7?Math.sin((travel-.18)/.52*Math.PI)*15:0;
-    fc.fillStyle="#1a2635";fc.fillRect(x-12,295-jump,24,52);
-    fc.fillStyle="#e9c5a0";fc.beginPath();fc.arc(x,286-jump,11,0,Math.PI*2);fc.fill();
-    fc.fillStyle="#19222b";fc.fillRect(x-10,344-jump,8,28);fc.fillRect(x+2,344-jump,8,28);
+    drawFreeWallPlayer(fc,x,347-jump,i,jump>0);
   }
   if(moving&&freeShot.wallBlocked){
     // Follow the original shot until the wall, then bounce down and sideways.
