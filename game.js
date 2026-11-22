@@ -1087,7 +1087,9 @@ if("speechSynthesis" in window){
 function commentary(message){
  if(!commentaryOn||!("speechSynthesis" in window))return;
  try{
-  speechSynthesis.cancel();
+  // Android may silently discard speech immediately following cancel().
+  // Resume a paused synthesizer and avoid cancelling on every goal.
+  if(speechSynthesis.paused)speechSynthesis.resume();
   // Stretch the goal shout without changing the visible score or other commentary.
   const isGoalShout=/go+l+!|(?:kafa|vole) golü!/i.test(message);
   const spoken=isGoalShout?"Gol!":message;
@@ -1096,6 +1098,7 @@ function commentary(message){
   speech.voice=chooseCommentatorVoice();
   // Slightly slower, lower-pitched delivery than the old high-pitched voice.
   speech.rate=isGoalShout?.90:.94;speech.pitch=isGoalShout?.9:.82;speech.volume=1;
+  speech.onerror=event=>console.warn("Spiker seslendirme hatası:",event.error);
   speechSynthesis.speak(speech);
  }catch(error){console.warn("Spiker:",error);}
 }
