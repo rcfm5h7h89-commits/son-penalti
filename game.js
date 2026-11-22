@@ -866,3 +866,57 @@ window.addEventListener("keydown",event=>{
 prepare();
 showCategory("balls");
 requestAnimationFrame(frame);
+
+
+// Free-kick mode: independent five-shot challenge with a defensive wall.
+const freeDialog=get("freeDialog"),freeCanvas=get("freeField"),fc=freeCanvas.getContext("2d");
+let freeShots=0,freeGoals=0,freeAim={x:410,y:185},freePower=68,freeBusy=false;
+function drawFree(){
+  fc.drawImage(background,0,0);
+  const wall=[335,370,405,440,475];
+  for(const x of wall){
+    fc.fillStyle="#1a2635";fc.fillRect(x-12,295,24,52);
+    fc.fillStyle="#e9c5a0";fc.beginPath();fc.arc(x,286,11,0,Math.PI*2);fc.fill();
+    fc.fillStyle="#19222b";fc.fillRect(x-10,344,8,28);fc.fillRect(x+2,344,8,28);
+  }
+  drawKeeper(410,241,0,performance.now()/1000);
+  drawBall(fc,410,438,19,0,balls.get(profile.selected)||balls.get("classic"));
+  fc.strokeStyle="#ffed68";fc.lineWidth=3;fc.beginPath();fc.arc(freeAim.x,freeAim.y,13,0,Math.PI*2);fc.stroke();
+  fc.beginPath();fc.moveTo(freeAim.x-18,freeAim.y);fc.lineTo(freeAim.x+18,freeAim.y);fc.moveTo(freeAim.x,freeAim.y-18);fc.lineTo(freeAim.x,freeAim.y+18);fc.stroke();
+}
+function freeStatus(message){
+ get("freeScore").textContent="Gol: "+freeGoals+" / "+freeShots+" · Kalan: "+(5-freeShots);
+ get("freeStatus").textContent=message;
+}
+function startFree(){
+ freeShots=0;freeGoals=0;freeBusy=false;freeAim={x:410,y:185};
+ get("freeKick").disabled=false;
+ freeStatus("Barajın yanından veya üzerinden nişan al.");
+ drawFree();freeDialog.showModal();
+}
+get("openFree").addEventListener("click",startFree);
+get("freePower").addEventListener("input",e=>{freePower=Number(e.target.value);get("freePowerText").textContent="%"+freePower;});
+freeCanvas.addEventListener("pointerdown",e=>{
+ if(freeBusy||freeShots>=5)return;
+ const rect=freeCanvas.getBoundingClientRect();
+ freeAim={x:clamp((e.clientX-rect.left)*820/rect.width,goal.left+12,goal.right-12),y:clamp((e.clientY-rect.top)*510/rect.height,goal.top+12,goal.bottom-12)};
+ drawFree();
+});
+get("freeKick").addEventListener("click",()=>{
+ if(freeBusy||freeShots>=5)return;
+ freeBusy=true;get("freeKick").disabled=true;
+ const x=freeAim.x+(Math.random()-.5)*(105-freePower)*1.3;
+ const y=freeAim.y+(Math.random()-.5)*(105-freePower)*.9;
+ const wallBlocked=y>225&&x>322&&x<488;
+ const keeperX=300+Math.random()*220;
+ const saved=Math.abs(x-keeperX)<42&&y>150&&y<270;
+ const goalIn=x>goal.left+12&&x<goal.right-12&&y>goal.top+10&&y<goal.bottom-10;
+ const scored=goalIn&&!wallBlocked&&!saved;
+ freeShots++;if(scored)freeGoals++;
+ freeStatus(wallBlocked?"🧱 Top baraja çarptı!":scored?"⚽ GOL!":saved?"🧤 Kaleci kurtardı!":"Şut dışarı gitti!");
+ fc.strokeStyle=scored?"#a5ff6c":"#ffac6c";fc.lineWidth=5;fc.beginPath();fc.arc(x,y,19,0,Math.PI*2);fc.stroke();
+ if(freeShots===5){
+   get("freeStatus").textContent+=" Seri bitti! "+freeGoals+" gol attın.";
+ }else setTimeout(()=>{if(!freeDialog.open)return;freeBusy=false;get("freeKick").disabled=false;drawFree();},750);
+});
+get("freeRestart").addEventListener("click",()=>{freeDialog.close();startFree();});
