@@ -235,3 +235,10 @@ button{cursor:pointer;font:inherit;min-height:42px;color:var(--text);background:
 
 /* Four header actions after removing Yeni seri button. */
 @media(max-width:740px){.mast-actions{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
+
+/* Keep the animated canvas visible in the scrollable mobile dialog.
+   The modal's flex layout was allowed to shrink it to nearly zero height. */
+#freeDialog[open]{display:flex!important;flex-direction:column!important;gap:7px!important;overflow-y:auto!important;overscroll-behavior:contain;max-height:calc(100dvh - 18px)!important;padding:12px!important}
+#freeDialog #freeField{display:block!important;flex:0 0 auto!important;flex-shrink:0!important;width:100%!important;height:auto!important;min-height:160px!important;aspect-ratio:820 / 510!important;object-fit:fill!important;visibility:visible!important;opacity:1!important}
+#freeDialog .match-head,#freeDialog #freeScore,#freeDialog #freeStatus,#freeDialog .free-power,#freeDialog #freePower,#freeDialog #freeKick,#freeDialog #freeRestart{flex-shrink:0!important}
+#freeDialog #freeKick{position:sticky;bottom:0;z-index:2;min-height:48px!important}
