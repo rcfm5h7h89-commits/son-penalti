@@ -319,3 +319,10 @@ button:disabled{filter:saturate(.6);opacity:.7}
 .panel,dialog{backdrop-filter:blur(5px)}
 .score{font-variant-numeric:tabular-nums}
 @media(prefers-reduced-motion:reduce){button{transition:none}}
+
+/* Visual refinement: sharp, readable interactive game UI */
+button{position:relative;overflow:hidden}
+button::after{content:"";position:absolute;left:10%;right:10%;top:1px;height:1px;background:linear-gradient(90deg,transparent,#ffffff55,transparent);pointer-events:none}
+button:focus-visible{outline:3px solid #e7ff8a;outline-offset:2px}
+.view canvas{backface-visibility:hidden}
+@media(max-width:650px){button{min-height:38px}.view{box-shadow:inset 0 0 20px #03140d55}}
