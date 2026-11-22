@@ -499,11 +499,7 @@ function startMatch() {
     status:"Kaleye dokunarak nişan al veya topu yukarı kaydırarak şut çek."};
   if(!matchDialog.open)matchDialog.showModal();
   renderMatch();
-  // Opening a match is a direct user action: enable and start the announcer here.
-  if(!commentaryOn) {
-   commentaryOn=true;
-   syncCommentaryButtons();
-  }
+  // Respect the shared commentator preference across all modes.
   commentary(tournament?"Turnuvada "+tournamentStages[tournament.stage]+" başlıyor!":"Maç başlıyor! Üç penaltılık heyecan dolu mücadele!");
 }
 function finishMatch() {
@@ -1065,7 +1061,7 @@ get("freeRestart").addEventListener("click",()=>{freeDialog.close();startFree();
 
 // Turkish match commentary. Prefer a locally available masculine voice when provided
 // by the browser/operating system; browser speech voices have no reliable gender API.
-let commentaryOn=false;
+let commentaryOn=(()=>{try{return localStorage.getItem("son-penalti-spiker")==="on";}catch{return false;}})();
 let commentatorVoice=null;
 function chooseCommentatorVoice(){
  if(!("speechSynthesis" in window))return null;
@@ -1111,12 +1107,14 @@ function syncCommentaryButtons(){
 }
 function toggleCommentary(){
  commentaryOn=!commentaryOn;
+ try{localStorage.setItem("son-penalti-spiker",commentaryOn?"on":"off");}catch{}
  syncCommentaryButtons();
  if(commentaryOn)commentary(matchDialog.open?(tournament?"Turnuva spikeri hazır!":"Maç spikeri hazır!"):"Son Penaltı maçına hoş geldiniz! Harika bir mücadele bizi bekliyor.");
  else if("speechSynthesis" in window)speechSynthesis.cancel();
 }
 get("commentaryToggle").addEventListener("click",toggleCommentary);
 get("matchCommentaryToggle").addEventListener("click",toggleCommentary);
+syncCommentaryButtons();
 
 // Corner mode: cross to a central attacker, then choose a header or volley.
 const cornerDialog=get("cornerDialog"),cornerCanvas=get("cornerField"),cc=cornerCanvas.getContext("2d");
