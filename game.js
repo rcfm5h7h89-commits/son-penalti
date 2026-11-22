@@ -1164,15 +1164,16 @@ cornerKick.addEventListener("click",()=>{
  if(cornerPhase!=="ready")return;
  cornerPhase="cross";cornerButtons();get("cornerOutcome").hidden=true;
  if(cornerShots===4)commentary("Son korner! Kritik an!");
- cornerStatus("🚩 Orta geliyor! Kafa veya Vole tuşuna bas!");
+ cornerStatus("🚩 Orta geliyor! Top oyuncuya ulaştığında Kafa veya Vole seç!");
  cornerCross={begin:performance.now(),duration:mix(1350,950,(cornerPower-20)/80)};
  function crossFrame(now){
   if(!cornerDialog.open){cornerFrame=null;return;}
   drawCorner(now);
   if(cornerPhase!=="cross"){cornerFrame=null;return;}
   if(now-cornerCross.begin>=cornerCross.duration){
-   cornerFrame=null;cornerPhase="result";cornerAction={label:"❌ KAÇIRDI!"};
-   finishCorner(false,"Topa dokunamadın!");
+   cornerFrame=null;cornerPhase="cross";
+   cornerStatus("⚽ Top oyuncuda! Kafa veya Vole tuşuna bas!");
+   drawCorner(now);
   }else cornerFrame=requestAnimationFrame(crossFrame);
  }
  cornerFrame=requestAnimationFrame(crossFrame);
@@ -1195,9 +1196,9 @@ function cornerFinish(type){
  if(cornerPhase!=="cross")return;
  const timing=clamp((performance.now()-cornerCross.begin)/cornerCross.duration,0,1);
  stopCornerFrame();
- const accuracy=Math.abs(timing-.82);
- const contact=accuracy<.31;
- const spread=(type==="header"?105:90)+accuracy*160;
+ const accuracy=Math.abs(Math.min(timing,1)-.90);
+ const contact=accuracy<.52;
+ const spread=(type==="header"?75:65)+accuracy*95;
  const x=cornerAim.x+(Math.random()-.5)*spread;
  const y=cornerAim.y+(type==="header"?-9:12)+(Math.random()-.5)*spread*.65;
  const post=contact&&y>=goal.top-10&&y<=goal.bottom+8&&(Math.abs(x-goal.left)<12||Math.abs(x-goal.right)<12||Math.abs(y-goal.top)<10);
