@@ -132,24 +132,24 @@ function drawNet(g) {
   polygon(g,[[left,bottom],[left,top],[right,top],[right,bottom]],null,"#eff6eb",7);
 }
 
-function drawKeeper(x,y,lean,t) {
+function drawKeeper(x,y,lean,t,ctx=c) {
   const shirt=shirts.get(profile.selectedShirt)??defaultShirt;
-  ellipse(c,x,goal.bottom-4,30,5,"#142e23a0");
-  c.save();c.translate(x,y);c.rotate(lean);
+  ellipse(ctx,x,goal.bottom-4,30,5,"#142e23a0");
+  ctx.save();ctx.translate(x,y);ctx.rotate(lean);
   const stride=Math.sin(t*10)*3*(1-Math.min(1,Math.abs(lean)));
-  c.lineCap="round";
-  polygon(c,[[-9,9],[-13+stride,25],[-20+stride,38]],null,"#223343",9);
-  polygon(c,[[8,9],[14-stride,24],[19-stride,38]],null,"#223343",9);
-  polygon(c,[[-20+stride,38],[-26+stride,39]],null,"#ebf3dd",5);
-  polygon(c,[[19-stride,38],[25-stride,38]],null,"#ebf3dd",5);
-  polygon(c,[[-13,-17],[-24,-8],[-28,-14]],null,shirt.sleeves,8);
-  polygon(c,[[13,-17],[24,-8],[29,-15]],null,shirt.sleeves,8);
-  ellipse(c,-29,-14,5,6,"#f5eee3");ellipse(c,30,-15,5,6,"#f5eee3");
-  polygon(c,[[-13,-20],[13,-20],[11,6],[-11,6]],shirt.body,"#243a34",1.5);
-  polygon(c,[[-4,-17],[-1,3],[4,3],[2,-17]],shirt.stripe);
-  ellipse(c,0,-28,9,10,"#b56e4f");
-  polygon(c,[[-9,-30],[-7,-36],[2,-39],[9,-32]],"#3c2e28");
-  c.restore();
+  ctx.lineCap="round";
+  polygon(ctx,[[-9,9],[-13+stride,25],[-20+stride,38]],null,"#223343",9);
+  polygon(ctx,[[8,9],[14-stride,24],[19-stride,38]],null,"#223343",9);
+  polygon(ctx,[[-20+stride,38],[-26+stride,39]],null,"#ebf3dd",5);
+  polygon(ctx,[[19-stride,38],[25-stride,38]],null,"#ebf3dd",5);
+  polygon(ctx,[[-13,-17],[-24,-8],[-28,-14]],null,shirt.sleeves,8);
+  polygon(ctx,[[13,-17],[24,-8],[29,-15]],null,shirt.sleeves,8);
+  ellipse(ctx,-29,-14,5,6,"#f5eee3");ellipse(ctx,30,-15,5,6,"#f5eee3");
+  polygon(ctx,[[-13,-20],[13,-20],[11,6],[-11,6]],shirt.body,"#243a34",1.5);
+  polygon(ctx,[[-4,-17],[-1,3],[4,3],[2,-17]],shirt.stripe);
+  ellipse(ctx,0,-28,9,10,"#b56e4f");
+  polygon(ctx,[[-9,-30],[-7,-36],[2,-39],[9,-32]],"#3c2e28");
+  ctx.restore();
 }
 
 function drawBallPattern(ctx,r,skin) {
@@ -879,7 +879,7 @@ function drawFree(){
     fc.fillStyle="#e9c5a0";fc.beginPath();fc.arc(x,286,11,0,Math.PI*2);fc.fill();
     fc.fillStyle="#19222b";fc.fillRect(x-10,344,8,28);fc.fillRect(x+2,344,8,28);
   }
-  drawKeeper(410,241,0,performance.now()/1000);
+  drawKeeper(410,241,0,performance.now()/1000,fc);
   drawBall(fc,410,438,19,0,balls.get(profile.selected)||balls.get("classic"));
   fc.strokeStyle="#ffed68";fc.lineWidth=3;fc.beginPath();fc.arc(freeAim.x,freeAim.y,13,0,Math.PI*2);fc.stroke();
   fc.beginPath();fc.moveTo(freeAim.x-18,freeAim.y);fc.lineTo(freeAim.x+18,freeAim.y);fc.moveTo(freeAim.x,freeAim.y-18);fc.lineTo(freeAim.x,freeAim.y+18);fc.stroke();
@@ -899,7 +899,9 @@ get("freePower").addEventListener("input",e=>{freePower=Number(e.target.value);g
 freeCanvas.addEventListener("pointerdown",e=>{
  if(freeBusy||freeShots>=5)return;
  const rect=freeCanvas.getBoundingClientRect();
- freeAim={x:clamp((e.clientX-rect.left)*820/rect.width,goal.left+12,goal.right-12),y:clamp((e.clientY-rect.top)*510/rect.height,goal.top+12,goal.bottom-12)};
+ const scale=Math.min(rect.width/820,rect.height/510);
+ const left=(rect.width-820*scale)/2,top=(rect.height-510*scale)/2;
+ freeAim={x:clamp((e.clientX-rect.left-left)/scale,goal.left+12,goal.right-12),y:clamp((e.clientY-rect.top-top)/scale,goal.top+12,goal.bottom-12)};
  drawFree();
 });
 get("freeKick").addEventListener("click",()=>{
