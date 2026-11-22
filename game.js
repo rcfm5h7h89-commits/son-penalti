@@ -1085,8 +1085,8 @@ function cornerStatus(message){
 }
 function cornerButtons(){
  cornerKick.disabled=cornerPhase!=="ready";
- cornerHead.disabled=cornerPhase!=="cross";
- cornerVolley.disabled=cornerPhase!=="cross";
+ cornerHead.disabled=cornerPhase!=="receive";
+ cornerVolley.disabled=cornerPhase!=="receive";
 }
 function drawCornerPlayer(action="",progress=0){
  const x=attacker.x,y=attacker.y;
@@ -1127,7 +1127,7 @@ function drawCorner(now=performance.now()){
  }else if(cornerPhase==="ready"){
   cc.save();cc.strokeStyle="#ffed6d";cc.lineWidth=3;cc.beginPath();cc.arc(cornerAim.x,cornerAim.y,19,0,Math.PI*2);cc.stroke();
   cc.beginPath();cc.moveTo(cornerAim.x-25,cornerAim.y);cc.lineTo(cornerAim.x+25,cornerAim.y);cc.moveTo(cornerAim.x,cornerAim.y-25);cc.lineTo(cornerAim.x,cornerAim.y+25);cc.stroke();cc.restore();
- }else if(cornerPhase==="cross"){bx=attacker.x;by=attacker.y-43;r=12;}
+ }else if(cornerPhase==="receive"){bx=attacker.x;by=attacker.y-43;r=12;}
  drawBall(cc,bx,by,r,now/75,balls.get(profile.selected)||balls.get("classic"));
  if(cornerShots===4&&cornerPhase!=="done"){
   cc.save();cc.fillStyle="#fff0a8";cc.font="bold 26px system-ui";cc.textAlign="center";cc.fillText("🔥 KRİTİK SON KORNER",410,50);cc.restore();
@@ -1164,15 +1164,15 @@ cornerKick.addEventListener("click",()=>{
  if(cornerPhase!=="ready")return;
  cornerPhase="cross";cornerButtons();get("cornerOutcome").hidden=true;
  if(cornerShots===4)commentary("Son korner! Kritik an!");
- cornerStatus("🚩 Orta geliyor! Top oyuncuya ulaştığında Kafa veya Vole seç!");
+ cornerStatus("🚩 Orta geliyor... Oyuncu topu alınca Kafa ve Vole açılacak.");
  cornerCross={begin:performance.now(),duration:mix(1350,950,(cornerPower-20)/80)};
  function crossFrame(now){
   if(!cornerDialog.open){cornerFrame=null;return;}
   drawCorner(now);
   if(cornerPhase!=="cross"){cornerFrame=null;return;}
   if(now-cornerCross.begin>=cornerCross.duration){
-   cornerFrame=null;cornerPhase="cross";
-   cornerStatus("⚽ Top oyuncuda! Kafa veya Vole tuşuna bas!");
+   cornerFrame=null;cornerPhase="receive";cornerButtons();
+   cornerStatus("⚽ Top oyuncuda! Şimdi KAFA veya VOLE tuşuna bas!");
    drawCorner(now);
   }else cornerFrame=requestAnimationFrame(crossFrame);
  }
@@ -1193,11 +1193,11 @@ function finishCorner(scored,message){
  },1700);
 }
 function cornerFinish(type){
- if(cornerPhase!=="cross")return;
+ if(cornerPhase!=="receive")return;
  const timing=clamp((performance.now()-cornerCross.begin)/cornerCross.duration,0,1);
  stopCornerFrame();
- const accuracy=Math.abs(Math.min(timing,1)-.90);
- const contact=accuracy<.52;
+ const accuracy=0;
+ const contact=true;
  const spread=(type==="header"?75:65)+accuracy*95;
  const x=cornerAim.x+(Math.random()-.5)*spread;
  const y=cornerAim.y+(type==="header"?-9:12)+(Math.random()-.5)*spread*.65;
