@@ -48,7 +48,13 @@ const shirts = new Map([
   ["lime",{name:"Yeşil Forma",price:shirtPrice,body:"#8bd44d",sleeves:"#46852f",stripe:"#d8fba6"}],
   ["violet",{name:"Mor Forma",price:shirtPrice,body:"#a37aed",sleeves:"#613eac",stripe:"#e5d2ff"}],
   ["pink",{name:"Pembe Forma",price:shirtPrice,body:"#f582b4",sleeves:"#af3d78",stripe:"#ffd4e8"}],
-  ["white",{name:"Beyaz Forma",price:shirtPrice,body:"#f1f7f5",sleeves:"#8fb8c0",stripe:"#52929d"}]
+  ["white",{name:"Beyaz Forma",price:shirtPrice,body:"#f1f7f5",sleeves:"#8fb8c0",stripe:"#52929d"}],
+  ["brazil",{name:"🇧🇷 Brezilya Forması",price:shirtPrice,body:"#ffdf28",sleeves:"#ffdf28",stripe:"#16884a",national:"brazil"}],
+  ["portugal",{name:"🇵🇹 Portekiz Forması",price:shirtPrice,body:"#b71932",sleeves:"#a5122b",stripe:"#087a46",national:"portugal"}],
+  ["argentina",{name:"🇦🇷 Arjantin Forması",price:shirtPrice,body:"#f8fbff",sleeves:"#85c9f1",stripe:"#75bce8",national:"argentina"}],
+  ["france",{name:"🇫🇷 Fransa Forması",price:shirtPrice,body:"#17366f",sleeves:"#102754",stripe:"#e63a49",national:"france"}],
+  ["spain",{name:"🇪🇸 İspanya Forması",price:shirtPrice,body:"#d91f32",sleeves:"#c41628",stripe:"#ffc928",national:"spain"}],
+  ["turkey",{name:"🇹🇷 Türkiye Forması",price:shirtPrice,body:"#f9fafb",sleeves:"#e8edf2",stripe:"#e51b35",national:"turkey"}]
 ]);
 
 function polygon(ctx,points,fill,stroke,width=1) {
@@ -257,7 +263,12 @@ function drawKeeper(x,y,lean,t,ctx=c) {
   polygon(ctx,[[13,-17],[24,-8],[29,-15]],null,shirt.sleeves,8);
   ellipse(ctx,-29,-14,5,6,"#f5eee3");ellipse(ctx,30,-15,5,6,"#f5eee3");
   polygon(ctx,[[-13,-20],[13,-20],[11,6],[-11,6]],shirt.body,"#243a34",1.5);
+  if(shirt.national){
+    ctx.save();ctx.beginPath();ctx.moveTo(-13,-20);ctx.lineTo(13,-20);ctx.lineTo(11,6);ctx.lineTo(-11,6);ctx.closePath();ctx.clip();
+    drawNationalKit(ctx,shirt,-13,-20,26,26);ctx.restore();
+  }else{
   polygon(ctx,[[-4,-17],[-1,3],[4,3],[2,-17]],shirt.stripe);
+  }
   // Jersey fabric sheen, seams and goalkeeper glove detail.
   ctx.save();
   ctx.globalAlpha=.23;
@@ -465,13 +476,43 @@ function previewBall(context,skin) {
   drawBall(context,76,61,48,-.22,skin);
 }
 
+function drawNationalKit(ctx,skin,x,y,w,h){
+  ctx.save();ctx.translate(x,y);ctx.scale(w,h);
+  ctx.fillStyle=skin.stripe;
+  switch(skin.national){
+    case "argentina":
+      for(const u of [.08,.42,.76])ctx.fillRect(u,0,.17,1);
+      break;
+    case "turkey":
+      ctx.fillRect(0,.27,1,.27);
+      ellipse(ctx,.43,.405,.075,.075,"#fff");
+      ellipse(ctx,.455,.385,.059,.059,skin.stripe);
+      polygon(ctx,Array.from({length:10},(_,i)=>{const a=i*Math.PI/5-Math.PI/2,r=i%2?.022:.05;return [.56+Math.cos(a)*r,.405+Math.sin(a)*r]}),"#fff");
+      break;
+    case "portugal":
+      ctx.fillRect(0,.84,1,.16);ctx.fillRect(0,0,.12,.14);ctx.fillRect(.88,0,.12,.14);
+      break;
+    case "france":
+      ctx.fillRect(.42,0,.16,.075);ctx.fillStyle="#fff";ctx.fillRect(.42,.075,.16,.04);
+      break;
+    default:
+      ctx.fillRect(0,0,.12,.13);ctx.fillRect(.88,0,.12,.13);ctx.fillRect(.38,0,.24,.065);
+  }
+  ctx.restore();
+}
+
 function previewShirt(context,skin) {
   ellipse(context,76,112,42,8,"#0918127a");
   polygon(context,[[44,22],[60,14],[68,25],[84,25],[92,14],[108,22],[132,42],
     [114,68],[103,61],[106,105],[46,105],[49,61],[38,68],[20,42]],skin.sleeves,"#101f1e",2);
   polygon(context,[[44,22],[60,14],[68,25],[84,25],[92,14],[108,22],[103,61],[106,105],[46,105],[49,61]],skin.body);
   polygon(context,[[61,26],[69,33],[83,33],[91,26]],null,skin.stripe,4);
+  if(skin.national){
+    context.save();context.beginPath();context.moveTo(44,22);context.lineTo(108,22);context.lineTo(103,61);context.lineTo(106,105);context.lineTo(46,105);context.lineTo(49,61);context.closePath();context.clip();
+    drawNationalKit(context,skin,44,22,64,83);context.restore();
+  }else{
   polygon(context,[[69,35],[82,35],[84,101],[69,101]],skin.stripe);
+  }
   polygon(context,[[81,38],[92,38],[92,47],[86.5,51],[81,47]],skin.stripe,"#f0f7ed",1);
 }
 
