@@ -1337,7 +1337,7 @@ function commentary(message){
   speech.lang="tr-TR";
   speech.voice=chooseCommentatorVoice();
   // Slightly slower, lower-pitched delivery than the old high-pitched voice.
-  speech.rate=isGoalShout?1.05:1.10;speech.pitch=isGoalShout?.60:.56;speech.volume=1;
+  speech.rate=isGoalShout?1.18:1.14;speech.pitch=isGoalShout?.78:.70;speech.volume=1;
   speech.onerror=event=>console.warn("Spiker seslendirme hatası:",event.error);
   speechSynthesis.speak(speech);
  }catch(error){console.warn("Spiker:",error);}
